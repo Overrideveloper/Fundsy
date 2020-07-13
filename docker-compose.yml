@@ -12,17 +12,25 @@ services:
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=fundsy_dev
     
+    redis:
+        image: redis:latest
+        ports:
+            - "6379:6379"
+        volumes:
+            - fundsy:/redis
+    
     backend:
-        build: .
+        build: ./backend
         command: bash -c "uvicorn app.server.app:app --host 0.0.0.0 --port 8000 --reload"
         volumes:
             - fundsy:/backend
         ports:
-            - "8000:8000"
+            - "8100:8000"
         env_file:
-            - "./.env"
+            - "./backend/.env"
         depends_on:
             - db
+            - redis
     
     pgadmin:
         container_name: pgadmin
