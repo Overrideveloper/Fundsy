@@ -16,14 +16,19 @@
                 </button>
 
                 <template v-if="investments">
-                    <Investment v-for="investment of investments" :key="investment.id" :investment="investment" btn_text="Edit" />
+                    <Investment v-for="investment of investments" :key="investment.id" :investment="investment" btn_text="Edit"
+                        v-on:investmentActionButtonClicked="openEditModal" />
                 </template>
             </div>
 
             <button @click="loadInvestments(page, per_page, true)" v-if="investments" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
 
             <template v-if="isAddModalOpen">
-                <AddInvestment v-on:close="closeModal" />
+                <AddInvestment v-on:close="closeAddModal" />
+            </template>
+            
+            <template v-if="isEditModalOpen">
+                <EditInvestment v-on:close="closeEditModal" :investment="investmentToEdit" />
             </template>
         </div>
     </div>
@@ -34,15 +39,17 @@
     import Loader from '@/components/Loader.vue';
     import Investment from '@/components/Investment.vue';
     import AddInvestment from '@/components/admin/AddInvestment.vue';
+    import EditInvestment from '@/components/admin/EditInvestment.vue';
     import { currentUser } from '../../services/auth';
     import { CurrentUser } from '../../types/auth';
     import { PaginationQuery, PaginatedData } from '../../types';
     import { investmentCache, getInvestments } from '../../services/investment';
     import { NOTIFICATIONS } from '../../services/notification';
+    import { InvestmentRes } from '../../types/investment';
 
     export default {
         name: 'Investments',
-        components: { NavBar, Loader, Investment, AddInvestment },
+        components: { NavBar, Loader, Investment, AddInvestment, EditInvestment },
         notifications: { ...NOTIFICATIONS },
         data() {
             return {
@@ -51,6 +58,8 @@
                 isPageLoading: true,
                 isMoreLoading: false,
                 isAddModalOpen: false,
+                isEditModalOpen: false,
+                investmentToEdit: null,
                 page: 1,
                 per_page: 10,
                 total: 0
@@ -74,7 +83,7 @@
                     this.isMoreLoading = true;
                 }
 
-                getInvestments<PaginatedData<Investment>>(query).then((data: PaginatedData<Investment>) => {
+                getInvestments<PaginatedData<InvestmentRes>>(query).then((data: PaginatedData<InvestmentRes>) => {
                     this.total = data.total;
                     this.isPageLoading = false;
                     this.isMoreLoading = false;
@@ -87,13 +96,26 @@
             openAddModal() {
                 this.isAddModalOpen = true;
             },
-            closeModal(addSuccess?: boolean) {
+            openEditModal(investment: InvestmentRes) {
+                this.investmentToEdit = investment;
+                this.isEditModalOpen = true;
+            },
+            closeAddModal(addSuccess?: boolean) {
                 this.isAddModalOpen = false;
 
                 if (addSuccess) {
                     this.total += 1;
                 }
-            }
+            },
+            closeEditModal(deleteSuccess?: boolean) {
+                this.isEditModalOpen = false;
+                this.investmentToEdit = null;
+
+                if (deleteSuccess) {
+                    this.total -= 1;
+                }
+            },
+
         }
     }
 </script>

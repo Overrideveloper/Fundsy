@@ -3,8 +3,8 @@
         <div class="modal-background"></div>
         <div class="modal-content">
             <div class="modal__card">
-                <div class="modal__card__title">New Investment</div>
-                <form class="modal__form" @submit.prevent="submit">
+                <div class="modal__card__title">Edit Investment</div>
+                <form class="modal__form" @submit.prevent="submitEdit">
                     <div class="modal__form__group">
                         <label for="title" class="form__group__label">Title <span class="label__required">*</span></label>
                         <input style="width: 70%" name="title" type="text" class="form__group__input" placeholder="Investment Beta" v-model="$v.title.$model" :class="{ 'form__group__input-invalid': $v.title.$error }">
@@ -44,14 +44,15 @@
 
                     <div class="modal__form__group">
                         <label for="withdrawal-cost" class="form__group__label">Withdrawal cost (%)</label>
-                        <input style="width:" name="withdrawal-cost" type="number" class="form__group__input" placeholder="0" v-model="withdrawalCost">
+                        <input style="width: 58%" name="withdrawal-cost" type="number" class="form__group__input" placeholder="0" v-model="withdrawalCost">
                     </div>
 
                     <div class="modal__form__controls">
                         <button class="modal__form__cancel button" @click.prevent="close()">Cancel</button>
 
                         <div class="modal__form__controls m-0">
-                            <button type="submit" class="modal__form__submit button" :class="{ 'is-loading': isSubmitting }" :disabled="$v.$invalid">Submit</button>
+                            <button class="modal__form__danger button" :class="{ 'is-loading': isDeleteSubmitting }" @click.prevent="submitDelete">Delete</button>
+                            <button type="submit" class="modal__form__submit button" :class="{ 'is-loading': isEditSubmitting }" :disabled="$v.$invalid">Submit</button>
                         </div>
                     </div>
                 </form>
@@ -62,16 +63,18 @@
 
 <script lang="ts">
     import { required, minValue } from 'vuelidate/lib/validators';
-    import { durationTypes, getSecondsFromDuration } from '../../common/utils';
+    import { durationTypes, getSecondsFromDuration, getDurationFromSeconds } from '../../common/utils';
     import { InvestmentReq } from '../../types/investment';
-    import { createInvestment } from '../../services/investment';
+    import { editInvestment, deleteInvestment } from '../../services/investment';
     import { NOTIFICATIONS } from '../../services/notification';
 
     export default {
-        name: 'AddInvestment',
+        name: 'EditInvestment',
+        props: ["investment"],
         data() {
             return {
                 durationTypes: durationTypes,
+                id: null,
                 title: '',
                 appRate: null,
                 appDurationAmount: null,
@@ -79,8 +82,12 @@
                 lockPeriodType: null,
                 lockPeriodAmount: null,
                 withdrawalCost: null,
-                isSubmitting: false
+                isEditSubmitting: false,
+                isDeleteSubmitting: false
             }
+        },
+        created() {
+            this.parseInvestmentPropToForm();
         },
         validations: {
             title: { required },
@@ -90,10 +97,27 @@
         },
         notifications: { ...NOTIFICATIONS },
         methods: {
-            close(addSuccess?: boolean) {
-                this.$emit('close', addSuccess);
+            parseInvestmentPropToForm() {
+                const { title, appreciation_amount, appreciation_duration, lock_period, withdrawal_cost }: InvestmentReq = this.$props.investment;
+                const { amount: appDurationAmount, type: appDurationType } = getDurationFromSeconds(appreciation_duration);
+
+                this.id = this.$props.investment.id;
+                this.title = title;
+                this.appRate = appreciation_amount;
+                this.appDurationAmount = appDurationAmount;
+                this.appDurationType = appDurationType;
+                this.withdrawalCost = withdrawal_cost ? withdrawal_cost : null;
+
+                if (lock_period) {
+                    const duration = getDurationFromSeconds(lock_period);
+                    this.lockPeriodType = duration.type;
+                    this.lockPeriodAmount = duration.amount;
+                }
             },
-            submit() {
+            close(deleteSuccess?: boolean) {
+                this.$emit('close', deleteSuccess);
+            },
+            submitEdit() {
                 this.$v.$touch();
 
                 if(!this.$v.$invalid) {
@@ -106,16 +130,27 @@
                         lock_period
                     }
 
-                    this.isSubmitting = true;
+                    this.isEditSubmitting = true;
 
-                    createInvestment(req).then(_ => {
-                        this.close(true);
-                        this.success({ message: 'New investment created'})
+                    editInvestment(this.id, req).then(_ => {
+                        this.close();
+                        this.success({ message: 'Investment edited'})
                     }).catch(err => {
-                        this.isSubmitting = false;
+                        this.isEditSubmitting = false;
                         this.error({ message: err });
                     });
                 }
+            },
+            submitDelete() {
+                this.isDeleteSubmitting = true;
+
+                deleteInvestment(this.id).then(_ => {
+                    this.close(true);
+                    this.success({ message: 'Investment deleted'})
+                }).catch(err => {
+                    this.isDeleteSubmitting = false;
+                    this.error({ message: err });
+                });
             }
         }
     }

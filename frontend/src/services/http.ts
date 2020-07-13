@@ -8,8 +8,6 @@ const instance: AxiosInstance = axios.create({
     baseURL: config.API_URI
 });
 
-console.log(config);
-
 function setAuthorizationHeader(config: AxiosRequestConfig) {
     const authToken = getAuthToken();
 
@@ -42,8 +40,6 @@ function handleError(error: AxiosError<Response<any>>): Promise<AxiosResponse> {
         return refreshToken().then(_ => {
             setAuthorizationHeader(error.config);
             error.config.baseURL = undefined;
-            console.log(error.config);
-            debugger;
             return instance.request(error.config);
         });
     }

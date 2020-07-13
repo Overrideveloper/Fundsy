@@ -9,7 +9,7 @@
                 <h5 class="investment__meta">- Appreciates {{_investment.appreciationRate}}% in {{_investment.appreciationDuration}}</h5>
                 <h5 class="investment__meta">- {{_investment.lockPeriod}}</h5>
                 <h5 class="investment__meta">- {{_investment.withdrawalCost}}</h5>
-                <button class="investment__btn">{{btn_text}}</button>
+                <button class="investment__btn" @click="emitInvestment">{{btn_text}}</button>
             </div>
 
         </div>
@@ -42,6 +42,11 @@
                 }
 
                 return { title, withdrawalCost, lockPeriod, appreciationDuration, appreciationRate: appreciation_amount };
+            }
+        },
+        methods: {
+            emitInvestment() {
+                this.$emit('investmentActionButtonClicked', this.$props.investment);
             }
         }
     }

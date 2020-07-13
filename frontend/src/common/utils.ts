@@ -30,8 +30,6 @@ export function getSecondsFromDuration(type: durationType, amount: number) {
 export function getDurationFromSeconds(seconds: number): { amount: number, type: durationType } {
     const duration: { amount: number, type: durationType } = { amount: 0, type: 'days' };
 
-    console.log(seconds);
-
     if (Number.isInteger(seconds / YEAR) === true) {
         duration.amount = (seconds / YEAR);
         duration.type = 'years';
