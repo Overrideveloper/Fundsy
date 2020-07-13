@@ -66,7 +66,7 @@
     import { durationTypes, getSecondsFromDuration, getDurationFromSeconds } from '../../common/utils';
     import { InvestmentReq } from '../../types/investment';
     import { editInvestment, deleteInvestment } from '../../services/investment';
-    import { NOTIFICATIONS } from '../../services/notification';
+    import { NOTIFICATIONS, prompt } from '../../services/notification';
 
     export default {
         name: 'EditInvestment',
@@ -121,35 +121,43 @@
                 this.$v.$touch();
 
                 if(!this.$v.$invalid) {
-                    const lock_period = (this.lockPeriodAmount && this.lockPeriodType) ? getSecondsFromDuration(this.lockPeriodType, this.lockPeriodAmount) : 0;
-                    const req: InvestmentReq = {
-                        title: this.title,
-                        appreciation_amount: this.appRate,
-                        appreciation_duration: getSecondsFromDuration(this.appDurationType, this.appDurationAmount),
-                        withdrawal_cost: this.withdrawalCost || 0,
-                        lock_period
-                    }
+                    prompt('info', 'Edit investment', 'Are you sure?').then(willAct => {
+                        if (willAct) {
+                            const lock_period = (this.lockPeriodAmount && this.lockPeriodType) ? getSecondsFromDuration(this.lockPeriodType, this.lockPeriodAmount) : 0;
+                            const req: InvestmentReq = {
+                                title: this.title,
+                                appreciation_amount: this.appRate,
+                                appreciation_duration: getSecondsFromDuration(this.appDurationType, this.appDurationAmount),
+                                withdrawal_cost: this.withdrawalCost || 0,
+                                lock_period
+                            }
 
-                    this.isEditSubmitting = true;
+                            this.isEditSubmitting = true;
 
-                    editInvestment(this.id, req).then(_ => {
-                        this.close();
-                        this.success({ message: 'Investment edited'})
-                    }).catch(err => {
-                        this.isEditSubmitting = false;
-                        this.error({ message: err });
+                            editInvestment(this.id, req).then(_ => {
+                                this.close();
+                                this.success({ message: 'Investment edited'})
+                            }).catch(err => {
+                                this.isEditSubmitting = false;
+                                this.error({ message: err });
+                            });
+                        }
                     });
                 }
             },
             submitDelete() {
-                this.isDeleteSubmitting = true;
+                prompt('warning', 'Delete investment', 'Are you sure?', true).then(willAct => {
+                    if (willAct) {
+                        this.isDeleteSubmitting = true;
 
-                deleteInvestment(this.id).then(_ => {
-                    this.close(true);
-                    this.success({ message: 'Investment deleted'})
-                }).catch(err => {
-                    this.isDeleteSubmitting = false;
-                    this.error({ message: err });
+                        deleteInvestment(this.id).then(_ => {
+                            this.close(true);
+                            this.success({ message: 'Investment deleted'})
+                        }).catch(err => {
+                            this.isDeleteSubmitting = false;
+                            this.error({ message: err });
+                        });
+                    }
                 });
             }
         }

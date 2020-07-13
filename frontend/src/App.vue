@@ -183,4 +183,21 @@
       max-height: 100%;
     }
   }
+
+  .swal-modal {
+    width: 360px;
+
+    .swal-title {
+      padding: 0;
+      font-size: 20px;
+    }
+
+    .swal-button--confirm {
+      background-color: var(--tertiary);
+    }
+
+    .swal-button--danger {
+      background-color: crimson;
+    }
+  }
 </style>

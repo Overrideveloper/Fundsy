@@ -1,4 +1,5 @@
 import miniToastr from 'mini-toastr';
+import swal from 'sweetalert';
 import { ToastTypes, ToastProps, NamedNotifications } from '@/types/notification';
 
 const toastTypes: ToastTypes = {
@@ -27,3 +28,7 @@ export const NOTIFICATIONS: NamedNotifications = {
     warn: { title: 'Warning!', message: '', type: 'warn' },
     error: { title: 'Error!', message: '', type: 'error' },
 };
+
+export function prompt(icon: 'info' | 'warning' = 'warning', title: string, text: string, danger?: boolean) {
+    return swal({ title, text, icon, buttons: [true, true], dangerMode: danger}).then(willAct => Promise.resolve(willAct));
+}

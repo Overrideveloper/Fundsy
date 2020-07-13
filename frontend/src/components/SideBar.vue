@@ -22,7 +22,7 @@
 
 <script lang="ts">
     import { logout } from '../services/auth'
-    import { NOTIFICATIONS } from '../services/notification'
+    import { NOTIFICATIONS, prompt } from '../services/notification'
     import router from '../router'
 
     export default {
@@ -36,11 +36,15 @@
         },
         methods: {
             logout() {
-                this.isLoggingOut = true;
+                prompt('warning', 'Log out', 'Are you sure?', true).then(willAct => {
+                    if (willAct) {
+                        this.isLoggingOut = true;
 
-                logout().then(_ => router.replace('/login')).catch(err => {
-                    this.error({ message: err });
-                    this.isLoggingOut = false;
+                        logout().then(_ => router.replace('/login')).catch(err => {
+                            this.error({ message: err });
+                            this.isLoggingOut = false;
+                        });
+                    }
                 });
             }
         }

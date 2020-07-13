@@ -65,7 +65,7 @@
     import { durationTypes, getSecondsFromDuration } from '../../common/utils';
     import { InvestmentReq } from '../../types/investment';
     import { createInvestment } from '../../services/investment';
-    import { NOTIFICATIONS } from '../../services/notification';
+    import { NOTIFICATIONS, prompt } from '../../services/notification';
 
     export default {
         name: 'AddInvestment',
@@ -97,24 +97,28 @@
                 this.$v.$touch();
 
                 if(!this.$v.$invalid) {
-                    const lock_period = (this.lockPeriodAmount && this.lockPeriodType) ? getSecondsFromDuration(this.lockPeriodType, this.lockPeriodAmount) : 0;
-                    const req: InvestmentReq = {
-                        title: this.title,
-                        appreciation_amount: this.appRate,
-                        appreciation_duration: getSecondsFromDuration(this.appDurationType, this.appDurationAmount),
-                        withdrawal_cost: this.withdrawalCost || 0,
-                        lock_period
-                    }
+                    prompt('info', 'Create investment', 'Are you sure?').then(willAct => {
+                        if (willAct) {
+                            const lock_period = (this.lockPeriodAmount && this.lockPeriodType) ? getSecondsFromDuration(this.lockPeriodType, this.lockPeriodAmount) : 0;
+                            const req: InvestmentReq = {
+                                title: this.title,
+                                appreciation_amount: this.appRate,
+                                appreciation_duration: getSecondsFromDuration(this.appDurationType, this.appDurationAmount),
+                                withdrawal_cost: this.withdrawalCost || 0,
+                                lock_period
+                            }
 
-                    this.isSubmitting = true;
+                            this.isSubmitting = true;
 
-                    createInvestment(req).then(_ => {
-                        this.close(true);
-                        this.success({ message: 'New investment created'})
-                    }).catch(err => {
-                        this.isSubmitting = false;
-                        this.error({ message: err });
-                    });
+                            createInvestment(req).then(_ => {
+                                this.close(true);
+                                this.success({ message: 'New investment created'})
+                            }).catch(err => {
+                                this.isSubmitting = false;
+                                this.error({ message: err });
+                            });
+                        }
+                    })
                 }
             }
         }
