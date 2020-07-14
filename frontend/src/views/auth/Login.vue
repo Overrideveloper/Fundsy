@@ -1,6 +1,6 @@
 <template>
     <div class="page page-login">
-        <h4 class="page-login__title">Fundsy</h4>
+        <h4 class="page-login__title">Fundsy.</h4>
         <div class="login__card">
             <h5 class="login__card__title">Sign In</h5>
 

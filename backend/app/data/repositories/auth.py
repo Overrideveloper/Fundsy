@@ -49,8 +49,8 @@ class AuthRepository(BaseRepository):
                     raise HTTPException(status_code=422, detail="Invalid credentials provided")
             else:
                 raise HTTPException(status_code=422, detail="Invalid credentials provided")
-        except HTTPException as err:
-            raise err
+        except HTTPException as httpexc:
+            raise httpexc
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
         
@@ -66,8 +66,8 @@ class AuthRepository(BaseRepository):
             else:
                 raise HTTPException(status_code=422, detail="Invalid credentials provided")
 
-        except HTTPException as err:
-            raise err
+        except HTTPException as httpexc:
+            raise httpexc
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
         
@@ -79,7 +79,14 @@ class AuthRepository(BaseRepository):
                 redis.delete(refresh_token)
             else:
                 raise HTTPException(status_code=422, detail="Invalid credentials provided")
-        except HTTPException as err:
-            raise err
+        except HTTPException as httpexc:
+            raise httpexc
+        except:
+            raise HTTPException(status_code=500, detail="An error occured. Please try again")
+
+    def check_user_exists(self, username: str) -> bool:
+        try:
+            existing_user = self.user_repo.get_by_username(username);
+            return True if existing_user else False
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")

@@ -4,7 +4,7 @@ export const AUTHORIZE = 'CUSTOMER';
 
 const customerRoutes: RouteConfig[] = [
     {
-        path: '/investments',
+        path: '/myinvestments',
         name: 'MyInvestments',
         component: () => import('../views/main/Home.vue'),
         meta: { authorize: [AUTHORIZE] }

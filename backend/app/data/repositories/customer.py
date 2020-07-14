@@ -23,8 +23,10 @@ class CustomerRepository(BaseRepository):
             self.db.refresh(customer)
             
             return customer
-
-        except Exception as err:
+        except HTTPException as httpexc:
+            raise httpexc
+        except:
+            self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
     
     def get_by_user(self, user_id: int) -> CustomerModel:
@@ -46,5 +48,3 @@ class CustomerRepository(BaseRepository):
                 return self.db.query(CustomerModel).all()
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
-        
-        

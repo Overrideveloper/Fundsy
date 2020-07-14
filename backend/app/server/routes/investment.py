@@ -20,8 +20,8 @@ def create(body: InvestmentReq = Body(...)):
 
         res = Response(data=dump(investment), code=201, message="Investment created")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as err:
-        raise err
+    except Exception as exc:
+        raise exc
 
 @router.get('')
 def get_all(page: int = Query(alias="page", gt=0, default=None), per_page: int = Query(alias="per_page", gt=0, default=None)):
@@ -31,8 +31,8 @@ def get_all(page: int = Query(alias="page", gt=0, default=None), per_page: int =
         res = Response(data=data, code=200, message="Investments returned")
         
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as err:
-        raise err
+    except Exception as exc:
+        raise exc
 
 @router.get('/{id}')
 def get_one(id: int = Path(..., gt=0)):
@@ -44,8 +44,8 @@ def get_one(id: int = Path(..., gt=0)):
 
         res = Response(data=dump(investment), code=200, message="Investment returned")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as err:
-        raise err
+    except Exception as exc:
+        raise exc
 
 @router.put('/{id}', dependencies=deps)
 def update(id: int = Path(..., gt=0), body: InvestmentReq = Body(...)):
@@ -55,8 +55,8 @@ def update(id: int = Path(..., gt=0), body: InvestmentReq = Body(...)):
 
         res = Response(data=dump(investment), code=200, message="Investment updated")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as err:
-        raise err
+    except Exception as exc:
+        raise exc
     
 @router.delete('/{id}', dependencies=deps)
 def delete(id: int = Path(..., gt=0)):
@@ -65,6 +65,5 @@ def delete(id: int = Path(..., gt=0)):
 
         res = Response(data=True, code=200, message="Investment deleted")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as err:
-        raise err
-
+    except Exception as exc:
+        raise exc

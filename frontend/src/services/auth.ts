@@ -1,5 +1,5 @@
 import { BehaviorSubject } from 'rxjs';
-import { CurrentUser, LoginReq, LoginRes } from '@/types/auth';
+import { CurrentUser, LoginReq, LoginRes, SignupReq, SignupRes } from '@/types/auth';
 import { getFromLS, saveToLS, removeFromLS } from './storage';
 import config from '@/common/config';
 import http from './http';
@@ -49,4 +49,16 @@ export function logout() {
             removeStoredDataOnLogout();
             return Promise.resolve(true);
         }).catch(err => Promise.reject(err));
+}
+
+export function signup(credentials: SignupReq) {
+    return http.post<Response<SignupRes>>('/customer/signup', credentials)
+        .then(({ data }) => Promise.resolve(data))
+        .catch(err => Promise.reject(err));
+}
+
+export function doesUserExist(username: string) {
+    return http.get<Response<boolean>>(`/auth/check_user_exists?username=${username}`)
+        .then(({ data }) => Promise.resolve(data.data))
+        .catch(err => Promise.reject(err));
 }

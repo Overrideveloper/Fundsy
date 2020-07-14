@@ -21,3 +21,11 @@ export interface LoginRes {
     refresh_token: string;
     data: CurrentUser;
 }
+
+export interface SignupReq {
+    name: string;
+    username: string;
+    password: string;
+}
+
+export interface SignupRes extends CurrentUser { }

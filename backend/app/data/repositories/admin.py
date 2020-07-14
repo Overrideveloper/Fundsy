@@ -21,8 +21,10 @@ class AdminRepository(BaseRepository):
             self.db.refresh(admin)
 
             return admin
-
+        except HTTPException as httpexc:
+            raise httpexc
         except:
+            self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
     
     def get_by_user(self, user_id: int) -> AdminModel:
@@ -35,4 +37,4 @@ class AdminRepository(BaseRepository):
         try:
             return self.db.query(AdminModel).first()
         except:
-                raise HTTPException(status_code=500, detail="An error occured. Please try again")
+            raise HTTPException(status_code=500, detail="An error occured. Please try again")

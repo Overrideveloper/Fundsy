@@ -20,6 +20,7 @@ class InvestmentRepository(BaseRepository):
 
             return investment
         except:
+            self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
     
     def update(self, _investment: InvestmentReq) -> InvestmentModel:
@@ -39,14 +40,14 @@ class InvestmentRepository(BaseRepository):
             self.db.refresh(investment)
             
             return investment
-        except HTTPException as err:
-            raise err
+        except HTTPException as httpexc:
+            raise httpexc
         except:
+            self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
         
     def delete(self, id: int) -> None:
         try:
-            
             query = self.db.query(InvestmentModel).filter(InvestmentModel.id == id)
             investment = query.first()
 
@@ -55,9 +56,10 @@ class InvestmentRepository(BaseRepository):
             else:
                 query.delete()
                 self.db.commit()
-        except HTTPException as err:
-            raise err
+        except HTTPException as httpexc:
+            raise httpexc
         except:
+            self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
             
     def get_one(self, id: int) -> InvestmentModel:

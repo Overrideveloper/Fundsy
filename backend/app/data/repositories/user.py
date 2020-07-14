@@ -24,6 +24,8 @@ class UserRepository(BaseRepository):
 
             return user
         except IntegrityError as err:
+            self.db.rollback()
             raise HTTPException(status_code=422, detail="Username already in use")
         except:
+            self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")

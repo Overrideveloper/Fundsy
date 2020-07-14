@@ -18,8 +18,8 @@ def signup(body: CustomerCreateReq = Body(...)):
         
         res = Response(data=data, code=201, message="Customer signed up successfully")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as err:
-        raise err
+    except Exception as exc:
+        raise exc
 
 @router.get('', dependencies=deps)
 def get_all(page: int = Query(alias="page", gt=0, default=None), per_page: int = Query(alias="per_page", gt=0, default=None)):
@@ -31,5 +31,5 @@ def get_all(page: int = Query(alias="page", gt=0, default=None), per_page: int =
         res = Response(data=data, code=200, message="Customers returned")
         
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as err:
-        raise err
+    except Exception as exc:
+        raise exc
