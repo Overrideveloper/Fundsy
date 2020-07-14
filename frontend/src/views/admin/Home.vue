@@ -11,7 +11,7 @@
 
     const routes: SidebarRoute[] = [
         { to: '/admin/investments', name: 'Investments' },
-        { to: '/admin/#', name: 'Customers' },
+        { to: '/admin/customers', name: 'Customers' },
     ]
 
     export default {

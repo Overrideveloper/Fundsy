@@ -66,6 +66,10 @@
             }
         },
         created() {
+            if (this.investments) {
+                this.isPageLoading = false;
+            }
+
             investmentCache.subscribe(val => this.investments = val);
             this.loadInvestments(this.page, this.per_page);
         },

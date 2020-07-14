@@ -9,6 +9,11 @@ const adminRoute: RouteConfig = {
     children: [
       { path: '/', redirect: '/admin/investments' },
       {
+        path: 'customers',
+        component: () => import('../views/admin/Customers.vue'),
+        meta: { authorize: [AUTHORIZE] }
+      },
+      {
         path: 'investments',
         component: () => import('../views/admin/Investments.vue'),
         meta: { authorize: [AUTHORIZE] }

@@ -9,7 +9,6 @@ class JWTValidator(HTTPBearer):
     
     async def __call__(self, request: Request):
         credentials: HTTPAuthorizationCredentials = await super().__call__(request)
-        print(credentials.credentials)
 
         if credentials:
             if not credentials.scheme == "Bearer":
@@ -24,7 +23,6 @@ class JWTValidator(HTTPBearer):
     def authorize(self, token: str, request: Request) -> bool:
         is_valid = False
         payload = decodeJWT(token)
-        print(payload)
         
         if payload:
             request.state.user = payload

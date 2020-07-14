@@ -34,7 +34,7 @@
                     <div class="modal__form__group">
                         <label for="lock-period" class="form__group__label">Lock period</label>
                         <div class="modal__form__flex modal__form__flex-inputonly">
-                            <input name="lock-period" type="number" class="form__group__input" placeholder="0" v-model="lockPeriodAmount">
+                            <input name="lock-period" type="number" class="form__group__input" placeholder="0" :class="{ 'form__group__input-invalid': $v.lockPeriodAmount.$error }" v-model="$v.lockPeriodAmount.$model">
                             <select class="form__group__input form__group__input-select" v-model="lockPeriodType">
                                 <option :value="null">--Select One--</option>
                                 <option v-for="type in durationTypes" :key="type" :value="type">{{type}}</option>
@@ -44,7 +44,7 @@
 
                     <div class="modal__form__group">
                         <label for="withdrawal-cost" class="form__group__label">Withdrawal cost (%)</label>
-                        <input style="width: 58%" name="withdrawal-cost" type="number" class="form__group__input" placeholder="0" v-model="withdrawalCost">
+                        <input style="width: 58%" name="withdrawal-cost" type="number" class="form__group__input" placeholder="0" :class="{ 'form__group__input-invalid': $v.withdrawalCost.$error }" v-model="$v.withdrawalCost.$model">
                     </div>
 
                     <div class="modal__form__controls">
@@ -93,7 +93,9 @@
             title: { required },
             appRate: { required, minValue: minValue(1) },
             appDurationAmount: { required, minValue: minValue(1) },
-            appDurationType: { required }
+            appDurationType: { required },
+            lockPeriodAmount: { minValue: minValue(0) },
+            withdrawalCost: { minValue: minValue(0) }
         },
         notifications: { ...NOTIFICATIONS },
         methods: {

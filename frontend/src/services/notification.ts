@@ -23,10 +23,10 @@ export const notificationOptions: { [key: string]: (props: ToastProps) => any } 
 }
 
 export const NOTIFICATIONS: NamedNotifications = {
-    success: { title: 'Success!', message: '', type: 'success' },
-    info: { title: 'Information', message: '', type: 'info' },
-    warn: { title: 'Warning!', message: '', type: 'warn' },
-    error: { title: 'Error!', message: '', type: 'error' },
+    success: { title: '', message: '', type: 'success' },
+    info: { title: '', message: '', type: 'info' },
+    warn: { title: '', message: '', type: 'warn' },
+    error: { title: '', message: '', type: 'error' },
 };
 
 export function prompt(icon: 'info' | 'warning' = 'warning', title: string, text: string, danger?: boolean) {

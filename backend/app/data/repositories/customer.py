@@ -1,5 +1,7 @@
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy import func
+from sqlalchemy.orm import Session, noload
+from typing import List, Union
 from .base import BaseRepository
 from .user import UserRepository, UserReq
 from data.schemas.customer import CustomerCreateReq
@@ -29,8 +31,20 @@ class CustomerRepository(BaseRepository):
         try:
             return self.db.query(CustomerModel).filter(CustomerModel.user_id == user_id).first()
         except:
-                raise HTTPException(status_code=500, detail="An error occured. Please try again")
-
-        
+            raise HTTPException(status_code=500, detail="An error occured. Please try again")
+            
+    def get_all(self, page: int=None, per_page: int=None) -> Union[List[CustomerModel], tuple]:
+        try:
+            if page and per_page:
+                offset = (page - 1) * per_page
+                
+                total = self.db.query(func.count(CustomerModel.id)).scalar()
+                records = self.db.query(CustomerModel).options(noload(CustomerModel.user)).limit(per_page).offset(offset).all()
+                
+                return total, records
+            else:
+                return self.db.query(CustomerModel).all()
+        except:
+            raise HTTPException(status_code=500, detail="An error occured. Please try again")
         
         

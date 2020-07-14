@@ -46,3 +46,10 @@ export function getDurationFromSeconds(seconds: number): { amount: number, type:
 
     return duration;
 }
+
+export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+export function getDateStringFromDateTime(datetime: string) {
+  const date = new Date(datetime);
+  return `${date.getDate()} ${MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
+}

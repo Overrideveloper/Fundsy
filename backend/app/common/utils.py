@@ -10,9 +10,6 @@ def signJWT(payload: dict) -> str:
 def decodeJWT(token: str) -> dict:
     try:
         payload = jwt.decode(token.encode(), JWT_SECRET, algorithms=["HS256"])
-        print(currentTimeUnix())
-        print(payload["expires"])
-        
         return None if currentTimeUnix() >= payload["expires"] else payload
     except:
         return None

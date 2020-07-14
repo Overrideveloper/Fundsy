@@ -12,3 +12,10 @@ class CustomerRes(Schema):
     name = fields.Str()
     user_id = fields.Int()
     user = fields.Nested(UserRes)
+
+class CustomerGetRes(Schema):
+    id = fields.Int()
+    name = fields.Str()
+    user_id = fields.Int()
+    created_at = fields.DateTime()
+    

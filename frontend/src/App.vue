@@ -200,4 +200,41 @@
       background-color: crimson;
     }
   }
+
+  .vgt-table {
+    background-color: transparent !important;
+
+    thead th {
+      border: 1px solid var(--tertiary) !important;
+      background: var(--tertiary-alt) !important;
+
+      span {
+        color: var(--dim-white);
+      }
+
+      &:before, &:after {
+        display: none;
+      }
+    }
+
+    tbody td {
+      border: 1px solid var(--tertiary) !important;
+      span {
+        color: var(--dim-white)
+      }
+    }
+  }
+
+  .vgt-wrap__footer {
+    border: 1px solid var(--tertiary) !important;
+    background: transparent !important;
+
+    .footer__row-count {
+      display: none;
+    }
+
+    span, a, div, select {
+      color: var(--dim-white) !important;
+    }
+  }
 </style>
