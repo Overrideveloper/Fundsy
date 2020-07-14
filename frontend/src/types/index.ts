@@ -1,6 +1,8 @@
 export interface SidebarRoute {
     to: string;
     name: string;
+    icon: string;
+    icon_solid?: boolean;
 }
 
 export interface PaginationQuery {

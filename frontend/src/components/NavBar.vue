@@ -28,7 +28,7 @@
         .nav__title {
             color: var(--tertiary);
             font-size: 20px;
-            margin: 0rem 1px 1rem 0;
+            margin: 0rem 0 1px 0;
         }
 
         .nav__user {
