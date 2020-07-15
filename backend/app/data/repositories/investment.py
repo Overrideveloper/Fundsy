@@ -57,8 +57,10 @@ class InvestmentRepository(BaseRepository):
                 query.delete()
                 self.db.commit()
         except HTTPException as httpexc:
+            print(httpexc)
             raise httpexc
-        except:
+        except Exception as err:
+            print(err)
             self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
             

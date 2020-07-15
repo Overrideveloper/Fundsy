@@ -3,6 +3,8 @@
         <NavBar :title="title" :user="user" />
         <Loader v-if="isPageLoading" />
         <div class="page__main" v-else>
+            <p class="customer__count">{{total}} customer{{ total === 1 ? '' : 's'}}</p>
+
             <DataTable :columns="columns" :rows="customers" :total="total" :per_page="per_page" :buttons="buttons"
             @pageChange="handlePageChange" @buttonClick="handleButtonClick" />
         </div>
@@ -19,12 +21,10 @@
     import { CurrentUser } from '../../types/auth';
     import { PaginationQuery, PaginatedData } from '../../types';
     import { NOTIFICATIONS } from '../../services/notification';
-import { getDateStringFromDateTime } from '../../common/utils';
+    import { getDateStringFromDateTime } from '../../common/utils';
 
-"2020-07-12T01:33:17.093689+00:00"
-"yyyy-mm-ddThh:mm:ss"
     export default {
-        name: 'Investments',
+        name: 'Customers',
         components: { NavBar, Loader, DataTable },
         notifications: { ...NOTIFICATIONS },
         data() {
@@ -41,7 +41,7 @@ import { getDateStringFromDateTime } from '../../common/utils';
                     { label: '', field: 'buttons' }
                 ],
                 buttons: [
-                    { id: 'view_investments', displayText: 'View Investments' }
+                    { id: 'view_investments', link: '/admin/customers/:id/transactions', displayText: 'View Transactions' }
                 ]
             }
         },
@@ -88,5 +88,11 @@ import { getDateStringFromDateTime } from '../../common/utils';
 
     .page__main {
         padding: 3rem;
+    }
+    
+    .customer__count {
+        color: var(--dim-white);
+        font-size: 13px;
+        margin:  0 0 1rem;
     }
 </style>

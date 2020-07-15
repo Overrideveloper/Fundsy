@@ -3,7 +3,12 @@
         <vue-good-table :columns="columns" :rows="rows" :totalRows="total" v-on:on-page-change="onPageChange" :fixed-header="true" :pagination-options="options">
             <template slot="table-row" slot-scope="props">
                 <div v-if="props.column.field === 'buttons'">
-                    <button class="button datatable__button" v-for="button of buttons" :key="button.id" @click.prevent="onButtonClick(button.id)">{{ button.displayText }}</button>
+                    <template v-for="button of buttons">
+                        <router-link v-if="button.link" :to="replacePathParam(button.link, props.row)" :key="button.id">
+                            <button class="button datatable__button">{{ button.displayText }}</button>
+                        </router-link>
+                        <button v-else class="button datatable__button" :key="button.id" @click.prevent="onButtonClick(button.id, props.row)">{{ button.displayText }}</button>
+                    </template>
                 </div>
             </template>
         </vue-good-table>
@@ -30,8 +35,20 @@
             onPageChange() {
                 this.$emit('pageChange');
             },
-            onButtonClick(btnId: string) {
-                this.$emit('buttonClick', btnId);
+            onButtonClick(btnId: string, data: any) {
+                this.$emit('buttonClick', btnId, data);
+            },
+            replacePathParam(link: string, data: any) {
+                const linkArr = link.split('/')
+                const linkParams = linkArr.filter(l => l.includes(':'));
+
+                linkParams.map(param => {
+                    const paramString = param.match(/[^:]+$/g)[0];
+                    const paramValue = data[paramString];
+                    linkArr.splice(linkArr.findIndex(l => l === param), 1, paramValue)
+                });
+
+                return linkArr.join('/')
             }
         }
     }

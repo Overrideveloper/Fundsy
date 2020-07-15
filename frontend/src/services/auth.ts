@@ -39,7 +39,7 @@ export function login(credentials: LoginReq) {
             saveAuthToken(data.data.auth_token);
             saveRefreshToken(data.data.refresh_token);
             saveCurrentUser(data.data.data);
-            return Promise.resolve(true);
+            return Promise.resolve(data.data.data);
         }).catch(err => Promise.reject(err));
 }
 

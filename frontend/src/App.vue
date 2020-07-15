@@ -10,7 +10,7 @@
     --primary-dark: #070B1F;
     --primary-dark-alt: #25294A;
     --tertiary: #3b54ec;
-    --tertiary-alt: rgba(59, 84, 236, 0.3);
+    --tertiary-alt: rgba(59, 84, 236, 0.1);
     --dim-white: rgba(248, 248, 255, 0.8);
   }
 
@@ -220,7 +220,8 @@
     tbody td {
       border: 1px solid var(--tertiary) !important;
       span {
-        color: var(--dim-white)
+        color: var(--dim-white);
+        text-transform: capitalize;
       }
     }
   }

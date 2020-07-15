@@ -29,7 +29,7 @@
 <script lang="ts">
     import router from '../../router';
     import { required, minLength } from 'vuelidate/lib/validators';
-    import { LoginReq } from '../../types/auth';
+    import { LoginReq, CurrentUser } from '../../types/auth';
     import { login } from '../../services/auth';
     import { NOTIFICATIONS } from '../../services/notification';
 
@@ -55,8 +55,13 @@
                     const credentials: LoginReq = { username: this.username, password: this.password };
                     this.isSubmitting = true;
 
-                    login(credentials).then(_ => {
-                        router.replace('/admin');
+                    login(credentials).then((user: CurrentUser) => {
+                        if (user.user.is_admin) {
+                            router.replace('/admin');
+                        } else {
+                            router.replace('/main');
+                        }
+
                         this.success({ message: 'Welcome back' })
                     }).catch(err => {
                         this.error({ message: err });

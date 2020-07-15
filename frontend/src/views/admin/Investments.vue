@@ -3,33 +3,20 @@
         <NavBar :title="title" :user="user" />
         <Loader v-if="isPageLoading" />
         <div class="page__main" v-else>
-            <p class="investment__count">{{total}} investment{{ total === 1 ? '' : 's'}}</p>
+            <div class="page__main__controls">
+                <p class="investment__count">{{total}} investment{{ total === 1 ? '' : 's'}}</p>
 
-            <div class="investments">
-                <button @click="openAddModal" class="new__investment">
-                    <svg class="new__investment__icon" width="50" height="50"  viewBox="0 0 36 36" preserveAspectRatio="xMidYMid meet">
-                        <path d="M26.17,17H19V9.83a1,1,0,0,0-2,0V17H9.83a1,1,0,0,0,0,2H17v7.17a1,1,0,0,0,2,0V19h7.17a1,1,0,0,0,0-2Z" class="clr-i-outline clr-i-outline-path-1"></path>
-                        <path d="M18,2A16,16,0,1,0,34,18,16,16,0,0,0,18,2Zm0,30A14,14,0,1,1,32,18,14,14,0,0,1,18,32Z" class="clr-i-outline clr-i-outline-path-2"></path>
-                        <rect x="0" y="0" width="36" height="36" fill-opacity="0"/>
-                    </svg>
-                    <span class="new__investment__text">New Investment</span>
+                <button  class="button new__button" @click="openAddModal">
+                    <clr-icon class="new__button__icon" shape="plus-circle"></clr-icon>
+                    New investment
                 </button>
-
-                <template v-if="investments">
-                    <Investment v-for="investment of investments" :key="investment.id" :investment="investment" btn_text="Edit"
-                        v-on:investmentActionButtonClicked="openEditModal" />
-                </template>
             </div>
-
-            <button @click="loadInvestments(page, per_page, true)" v-if="investments" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
-
-            <template v-if="isAddModalOpen">
-                <AddInvestment v-on:close="closeAddModal" />
-            </template>
             
-            <template v-if="isEditModalOpen">
-                <EditInvestment v-on:close="closeEditModal" :investment="investmentToEdit" />
-            </template>
+            <DataTable :columns="columns" :rows="investments" :total="total" :per_page="per_page" :buttons="buttons"
+            @pageChange="handlePageChange" @buttonClick="handleButtonClick" />
+
+            <AddInvestment v-if="isAddModalOpen" v-on:close="closeAddModal" />
+            <EditInvestment v-if="isEditModalOpen" v-on:close="closeEditModal" :investment="investmentToEdit" />
         </div>
     </div>
 </template>
@@ -37,6 +24,7 @@
 <script lang="ts">
     import NavBar from '@/components/NavBar.vue';
     import Loader from '@/components/Loader.vue';
+    import DataTable from '@/components/DataTable.vue';
     import Investment from '@/components/Investment.vue';
     import AddInvestment from '@/components/admin/AddInvestment.vue';
     import EditInvestment from '@/components/admin/EditInvestment.vue';
@@ -46,23 +34,34 @@
     import { investmentCache, getInvestments } from '../../services/investment';
     import { NOTIFICATIONS } from '../../services/notification';
     import { InvestmentRes } from '../../types/investment';
+    import { getDurationFromSeconds } from '../../common/utils';
 
     export default {
         name: 'Investments',
-        components: { NavBar, Loader, Investment, AddInvestment, EditInvestment },
+        components: { NavBar, Loader, Investment, AddInvestment, EditInvestment, DataTable },
         notifications: { ...NOTIFICATIONS },
         data() {
             return {
                 title: 'Investments',
                 investments: null,
                 isPageLoading: true,
-                isMoreLoading: false,
                 isAddModalOpen: false,
                 isEditModalOpen: false,
                 investmentToEdit: null,
                 page: 1,
                 per_page: 10,
-                total: 0
+                total: 0,
+                columns: [
+                    { label: 'Title', field: 'title' },
+                    { label: 'Appreciation Rate', field: 'appreciation_amount', formatFn: this.appreciationRateFormatFn },
+                    { label: 'Appreciation Duration', field: 'appreciation_duration', formatFn: this.appreciationDurationFormatFn },
+                    { label: 'Lock Period', field: 'lock_period', formatFn: this.lockPeriodFormatFn },
+                    { label: 'Withdrawal Cost', field: 'withdrawal_cost', formatFn: this.withdrawalCostFormatFn },
+                    { label: '', field: 'buttons' }
+                ],
+                buttons: [
+                    { id: 'edit_investment', displayText: 'Edit' }
+                ]
             }
         },
         created() {
@@ -80,17 +79,12 @@
             }
         },
         methods: {
-            loadInvestments(page: number, per_page: number, isMore?: boolean) {
+            loadInvestments(page: number, per_page: number) {
                 const query: PaginationQuery = { page, per_page };
-
-                if (isMore) {
-                    this.isMoreLoading = true;
-                }
 
                 getInvestments<PaginatedData<InvestmentRes>>(query).then((data: PaginatedData<InvestmentRes>) => {
                     this.total = data.total;
                     this.isPageLoading = false;
-                    this.isMoreLoading = false;
 
                     if (data.data.length === per_page) {
                         this.page += 1;
@@ -119,7 +113,34 @@
                     this.total -= 1;
                 }
             },
+            withdrawalCostFormatFn(value: number) {
+                return value ? 'None' : `${value}%`;
+            },
+            lockPeriodFormatFn(value: number) {
+                if (value) {
+                    const { amount, type } = getDurationFromSeconds(value);
+                    return `${amount} ${type}`;
+                }
 
+                return 'None';
+            },
+            appreciationRateFormatFn(value: number) {
+                return `${value}%`;
+            },
+            appreciationDurationFormatFn(value: number) {
+                const { amount, type } = getDurationFromSeconds(value);
+                
+                return `${amount} ${type}`;
+            },
+            handlePageChange() {
+                this.info('Fetching investments...')
+                this.loadInvestments(this.page, this.per_page);
+            },
+            handleButtonClick(buttonId: string, data: any) {
+                if (buttonId === 'edit_investment') {
+                    this.openEditModal(data as InvestmentRes);
+                }
+            }
         }
     }
 </script>
@@ -130,7 +151,7 @@
     }
 
     .page__main {
-        padding: 2rem;
+        padding: 3rem;
     }
 
     .investment__count {
@@ -138,68 +159,30 @@
         font-size: 13px;
     }
 
-    .investments {
-        margin-top: 1.5rem;
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    .new__investment {
-        height: 180px;
-        width: 240px;
-        border: 1px solid var(--tertiary);
-        border-radius: 8px;
+    .page__main__controls {
         display: flex;
         align-items: center;
-        justify-content: center;
-        background-color: transparent;
-        margin-right: 40px;
-        margin: 0 16px 32px 16px;
-        display: flex;
-        flex-direction: column;
-        cursor: pointer;
-        transition: all 500ms ease;
-
-        .new__investment__text {
-            font-size: 16px;
-            color: var(--tertiary);
-        }
-
-        .new__investment__icon {
-            fill: var(--tertiary);
-            margin-bottom: 1rem;
-        }
-
-        &:hover {
-            box-shadow: 0 0.5em 1em -0.125em rgba(0, 209, 178, 0.1), 0 0px 0 1px rgba(0, 209, 178, 0.1);
-            background-color: var(--tertiary);
-
-            .new__investment__text {
-                color: var(--dim-white);
-            }
-
-            .new__investment__icon {
-                fill: var(--dim-white);
-            }
-        }
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin:  0 0 1rem;
     }
 
-    .load__more__btn {
-        display: block;
-        margin: 1rem auto;
-        padding: 1rem 2rem;
-        border-radius: 4px;
-        border: none;
-        background-color: #3b53ec1e;
-        color: var(--tertiary);
-        line-height: inherit;
-        height: inherit;
-        cursor: pointer;
+    .new__button {
         font-size: 14px;
+        background-color: var(--tertiary-alt);
+        color: var(--tertiary);
+        cursor: pointer;
+        border: none;
+        transition: all 500ms ease;
+
+
+        .new__button__icon {
+            margin-right: 4px;
+        }
 
         &:hover {
-            color: var(--dim-white);
-            background-color: var(--tertiary);   
+            background-color: var(--tertiary);
+            color: white;
         }
     }
 </style>
