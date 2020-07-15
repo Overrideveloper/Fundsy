@@ -10,10 +10,13 @@
                     We have {{total}} investment option{{ total === 1 ? '' : 's'}} for you to choose from:</p>
 
                 <div class="investments">
-                    <Investment v-for="investment of investments" :key="investment.id" :investment="investment" btn_text="Invest now" />
+                    <Investment v-for="investment of investments" :key="investment.id" :investment="investment" btn_text="Invest now"
+                        @actionButtonClicked="onInvestmentActionButtonClick" />
                 </div>
                 
-                <button @click="loadInvestments(page, per_page, true)" v-if="investments" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
+                <button @click="loadInvestments(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
+        
+                <InvestModal v-if="isInvestModalOpen" :investment="investmentToInvestIn" :customer_id="user.id" @close="onInvestModalCloseEmit" />
             </template>
         </div>
     </div>
@@ -24,6 +27,7 @@
     import Loader from '@/components/Loader.vue';
     import Empty from '@/components/Empty.vue';
     import Investment from '@/components/Investment.vue';
+    import InvestModal from '@/components/InvestModal.vue';
     import { currentUser } from '../../services/auth';
     import { CurrentUser } from '../../types/auth';
     import { PaginationQuery, PaginatedData } from '../../types';
@@ -33,7 +37,7 @@
 
     export default {
         name: 'Invest',
-        components: { NavBar, Loader, Investment, Empty },
+        components: { NavBar, Loader, Investment, Empty, InvestModal },
         notifications: { ...NOTIFICATIONS },
         data() {
             return {
@@ -41,6 +45,8 @@
                 investments: null,
                 isPageLoading: true,
                 isMoreLoading: false,
+                isInvestModalOpen: false,
+                investmentToInvestIn: null,
                 page: 1,
                 per_page: 10,
                 total: 0
@@ -57,10 +63,13 @@
         computed: {
             user: function() {
                 const user = <CurrentUser> currentUser.getValue();
-                return { name: user.name, username: user.user.username };
+                return { id: user.id, name: user.name, username: user.user.username };
             },
             isEmpty: function() {
                 return !this.investments || (this.investments && !this.investments.length)
+            },
+            showLoadMore: function() {
+                return this.investments && this.investments.length !== this.total;
             }
         },
         methods: {
@@ -80,6 +89,14 @@
                         this.page += 1;
                     }
                 }).catch(err => this.error({ message: err }));
+            },
+            onInvestmentActionButtonClick(investment: InvestmentRes) {
+                this.investmentToInvestIn = investment;
+                this.isInvestModalOpen = true;
+            },
+            onInvestModalCloseEmit() {
+                this.investmentToInvestIn = null;
+                this.isInvestModalOpen = false;
             }
         }
     }

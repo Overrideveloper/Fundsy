@@ -2,11 +2,10 @@ import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } f
 import config from '@/common/config'
 import { currentUser, getRefreshToken, saveAuthToken, getAuthToken } from './auth';
 import { Response } from '@/types/http';
-import Axios from 'axios';
 
-const instance: AxiosInstance = axios.create({
-    baseURL: config.API_URI
-});
+const DEFAULT_ERROR = 'An error occurred. Please check your internet connection and try again.';
+
+const instance: AxiosInstance = axios.create({ baseURL: config.API_URI });
 
 function setAuthorizationHeader(config: AxiosRequestConfig) {
     const authToken = getAuthToken();
@@ -44,7 +43,7 @@ function handleError(error: AxiosError<Response<any>>): Promise<AxiosResponse> {
         });
     }
 
-    return Promise.reject(error.response?.data.message);
+    return Promise.reject(message || DEFAULT_ERROR);
 }
 
 instance.interceptors.request.use(config => {

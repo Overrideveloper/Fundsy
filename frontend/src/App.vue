@@ -39,7 +39,7 @@
     border-radius: 6px;
     height: auto;
     width: auto;
-    padding: 1.5rem 2rem 2rem;
+    padding: 1.5rem 2rem;
   }
 
   .modal__card__title {
@@ -235,6 +235,15 @@
 
     span, a, div, select {
       color: var(--dim-white) !important;
+    }
+  }
+
+  .form__group__input-currency {
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
   }
 </style>

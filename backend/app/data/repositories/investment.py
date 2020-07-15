@@ -70,15 +70,17 @@ class InvestmentRepository(BaseRepository):
     
     def get_all(self, page: int=None, per_page: int=None) -> Union[List[InvestmentModel], tuple]:
         try:
+            query = self.db.query(InvestmentModel).options(noload(InvestmentModel.customer_investments)).order_by(InvestmentModel.title.asc())
+
             if page and per_page:
                 offset = (page - 1) * per_page
                 
                 total = self.db.query(func.count(InvestmentModel.id)).scalar()
-                records = self.db.query(InvestmentModel).options(noload(InvestmentModel.customer_investments)).limit(per_page).offset(offset).all()
+                records = query.limit(per_page).offset(offset).all()
                 
                 return total, records
             else:
-                return self.db.query(InvestmentModel).options(noload(InvestmentModel.customer_investments)).all()
+                return query.all()
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
             

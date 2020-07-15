@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import AdminRoute, { AUTHORIZE as ADMIN_AUTHORIZE } from './admin'
 import AuthRoutes from './auth'
-import CustomerRoute, { AUTHORIZE as CUSTOMER_AUTHORIZE } from './customer'
+import MainRoute, { AUTHORIZE as MAIN_AUTHORIZE } from './main'
 import config from '@/common/config'
 import { homeRedirect } from './utils'
 import { currentUser } from '@/services/auth'
@@ -18,7 +18,7 @@ const routes: RouteConfig[] = [
     meta: { authorize: [] }
   },
   AdminRoute,
-  CustomerRoute,
+  MainRoute,
   ...AuthRoutes,
   { path: '*', redirect: '/'}
 ];
@@ -42,7 +42,7 @@ router.beforeEach((to, from, next) => {
     }
 
     if (authorize.length) {
-      if ((authorize.includes(ADMIN_AUTHORIZE) && !user.user.is_admin) || (authorize.includes(CUSTOMER_AUTHORIZE) && !!user.user.is_admin)) {
+      if ((authorize.includes(ADMIN_AUTHORIZE) && !user.user.is_admin) || (authorize.includes(MAIN_AUTHORIZE) && !!user.user.is_admin)) {
         return next({ path: from.path });
       }
     }

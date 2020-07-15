@@ -24,7 +24,7 @@
             <CustomerInvestment v-for="customerInvestment of customerInvestments" :key="customerInvestment.id" :customer_investment="customerInvestment" />
           </div>
           
-          <button @click="loadCustomerInvestments(page, per_page, true)" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
+          <button @click="loadCustomerInvestments(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
       </template>
     </div>
   </div>
@@ -41,9 +41,10 @@
   import { customerInvestmentCache, getCustomerInvestments } from '../../services/customer_investment';
   import { PaginationQuery, PaginatedData } from '../../types';
   import { CustomerInvestmentRes } from '../../types/customer_investment';
+import { NOTIFICATIONS } from '../../services/notification';
 
   export default {
-    name: 'MyInvestments',
+    name: 'CustomerInvestments',
     components: { NavBar, SideBar, Empty, Loader, CustomerInvestment },
     data() {
       return {
@@ -59,6 +60,7 @@
         total: 0
       }
     },
+    notifications: { ...NOTIFICATIONS },
     created() {
       if (this.customerInvestments) {
         this.isPageLoading = false;
@@ -73,7 +75,10 @@
         return { id: user.id, name: user.name, username: user.user.username };
       },
       isEmpty: function() {
-        return !this.customerInvestments || (this.customerInvestments && !this.customerInvestments.length)
+        return this.customerInvestments && !this.customerInvestments.length;
+      },
+      showLoadMore: function() {
+        return this.customerInvestments && this.customerInvestments.length !== this.total;
       }
     },
     methods: {
@@ -92,7 +97,9 @@
           if (data.data.length === per_page) {
             this.page += 1;
           }
-        }).catch(err => this.error({ message: err }));
+        }).catch(err => {
+          this.error({ message: err });
+        });
       }
     }
   }

@@ -75,7 +75,7 @@
         overflow-wrap: normal;
         word-break: break-word;
         white-space: break-spaces;
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 500;
     }
 
@@ -85,7 +85,7 @@
         overflow-wrap: normal;
         word-break: break-word;
         white-space: break-spaces;
-        font-size: 20px;
+        font-size: 18px;
     }
 
     .customerinvestment__meta {
@@ -95,7 +95,7 @@
         border-radius: 4px;
 
         .customerinvestment__meta__text {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--dim-white);
             text-transform: capitalize;
         }

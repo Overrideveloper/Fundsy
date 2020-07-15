@@ -8,7 +8,7 @@ export const customerInvestmentCache = new BehaviorSubject<CustomerInvestment[] 
 
 function cacheCustomerInvestments(customerInvestments: CustomerInvestment[]) {
     let cache: CustomerInvestment[] = customerInvestmentCache.getValue() || [];
-    cache = [...cache, ...customerInvestments];
+    cache = [ ...cache, ...customerInvestments ];
 
     customerInvestmentCache.next(Array.from(new Set(cache.map(c => c.id))).map(id => <CustomerInvestment> cache.find(c => c.id === id)));
 }
@@ -46,7 +46,7 @@ export function getCustomerInvestments<T = CustomerInvestment[] | PaginatedData<
     }).catch(err => Promise.reject(err));
 }
 
-export function createInvestment(req: CustomerInvestmentCreateReq) {
+export function createCustomerInvestment(req: CustomerInvestmentCreateReq) {
     return http.post<Response<CustomerInvestment>>('/customer_investment', req).then(({ data }) => {
         cacheCustomerInvestments([data.data]);
         return Promise.resolve(data.data);

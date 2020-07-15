@@ -1,16 +1,16 @@
 import { RouteConfig } from 'vue-router';
 
-export const AUTHORIZE = 'CUSTOMER';
+export const AUTHORIZE = 'MAIN';
 
-const customerRoute: RouteConfig = {
+const mainRoute: RouteConfig = {
     path: '/main',
     component: () => import('../views/main/Home.vue'),
     meta: { authorize: [AUTHORIZE] },
     children: [
-      { path: '/', redirect: '/main/investments' },
+      { path: '/', redirect: '/main/my-investments' },
       {
-        path: 'investments',
-        component: () => import('../views/main/MyInvestments.vue'),
+        path: 'my-investments',
+        component: () => import('../views/main/CustomerInvestments.vue'),
         meta: { authorize: [AUTHORIZE] }
       },
       {
@@ -21,4 +21,4 @@ const customerRoute: RouteConfig = {
     ]
 }
 
-export default customerRoute;
+export default mainRoute;

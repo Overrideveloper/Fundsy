@@ -43,14 +43,16 @@ class CustomerRepository(BaseRepository):
             
     def get_all(self, page: int=None, per_page: int=None) -> Union[List[CustomerModel], tuple]:
         try:
+            query = self.db.query(CustomerModel).options(noload(CustomerModel.user)).order_by(CustomerModel.name.asc())
+
             if page and per_page:
                 offset = (page - 1) * per_page
                 
                 total = self.db.query(func.count(CustomerModel.id)).scalar()
-                records = self.db.query(CustomerModel).options(noload(CustomerModel.user)).limit(per_page).offset(offset).all()
+                records = query.limit(per_page).offset(offset).all()
                 
                 return total, records
             else:
-                return self.db.query(CustomerModel).all()
+                return query.all()
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")

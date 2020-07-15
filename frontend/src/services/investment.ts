@@ -6,9 +6,9 @@ import { InvestmentRes as Investment, InvestmentReq } from '@/types/investment';
 
 export const investmentCache = new BehaviorSubject<Investment[] | null>(null);
 
-function cacheInvestments(investments: Investment[]) {
+function cacheInvestments(investments: Investment[], stack?: boolean) {
     let cache: Investment[] = investmentCache.getValue() || [];
-    cache = [...cache, ...investments];
+    cache = stack ? [ ...investments, ...cache] : [...cache, ...investments];
 
     investmentCache.next(Array.from(new Set(cache.map(c => c.id))).map(id => <Investment> cache.find(c => c.id === id)));
 }
@@ -47,7 +47,7 @@ export function getInvestments<T = Investment[] | PaginatedData<Investment>>(que
 
 export function createInvestment(req: InvestmentReq) {
     return http.post<Response<Investment>>('/investment', req).then(({ data }) => {
-        cacheInvestments([data.data]);
+        cacheInvestments([data.data], true);
         return Promise.resolve(data.data);
     }).catch(err => Promise.reject(err));
 }
