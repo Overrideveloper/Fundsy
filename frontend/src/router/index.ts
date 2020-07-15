@@ -38,7 +38,7 @@ router.beforeEach((to, from, next) => {
 
   if (authorize) {
     if (!user) {
-      return next({ path: '/login', query: { returnUrl: to.path } });
+      return next({ path: '/login' });
     }
 
     if (authorize.length) {

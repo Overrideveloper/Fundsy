@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field
 from marshmallow import Schema, fields, validate
+from marshmallow_enum import EnumField
 from decimal import Decimal
 
-from .customer_investment import CustomerInvestmentRes
+from .customer_investment import CustomerInvestmentRes, CustomerInvestmentResOmitInvestment
 from data.models.base import TransactionType
 
 class TransactionCreateReq(BaseModel):
@@ -12,8 +13,11 @@ class TransactionCreateReq(BaseModel):
     customer_id: int = Field(...)
 
 class TransactionRes(Schema):
-    amount = fields.Decimal()
-    type = fields.Str(validate=validate.OneOf(["CREDIT", "WITHDRAWAL"]))
+    id = fields.Int()
+    amount = fields.Int()
+    type = EnumField(TransactionType, by_value=True)
     customer_investment_id = fields.Int()
     customer_id = fields.Int()
-    customer_investment = fields.Nested(CustomerInvestmentRes)
+    customer_investment = fields.Nested(CustomerInvestmentResOmitInvestment)
+    created_at = fields.DateTime()
+    

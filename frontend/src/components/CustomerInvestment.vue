@@ -26,7 +26,7 @@
         name: 'CustomerInvestment',
         props: ["customer_investment"],
         computed: {
-            customerInvestment() {
+            customerInvestment: function() {
                 const { title, amount: _amount, created_at, id, investment }: CustomerInvestmentRes = this.$props.customer_investment;
 
                 const amount = formatAmountFromAPI(_amount)

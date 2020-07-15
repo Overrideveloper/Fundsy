@@ -63,7 +63,7 @@ import router from '../../router';
             this.isUsernameUnique(this.$data.$username).subscribe(flag => this.$data._isUsernameUnique = !flag);
         },
         computed: {
-            isFormValid() {
+            isFormValid: function() {
                 return !(this.$v.$invalid || !this.$data._isUsernameUnique)
             }
         },

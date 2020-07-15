@@ -38,7 +38,7 @@ class AuthRepository(BaseRepository):
                         if not data:
                             raise HTTPException(status_code=404, detail="Customer not found")
                     
-                    auth_token_payload = { "id": user.id, "is_admin": user.is_admin  }
+                    auth_token_payload = { "id": data["id"], "user_id": user.id, "is_admin": user.is_admin  }
                     auth_token = signJWT(auth_token_payload)
                     refresh_token = uuid4().hex
 

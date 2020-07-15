@@ -55,9 +55,9 @@ class CustomerInvestmentRepository(BaseRepository):
             self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
         
-    def get_by_customer_id(self, customer_id, page: int=None, per_page: int=None) -> Union[List[CustomerInvestmentModel], tuple]:
+    def get_by_customer_id(self, id: int, page: int=None, per_page: int=None) -> Union[List[CustomerInvestmentModel], tuple]:
         try:
-            query = self.db.query(CustomerInvestmentModel).options(noload(CustomerInvestmentModel.customer)).options(noload(CustomerInvestmentModel.transactions)).filter(CustomerInvestmentModel.customer_id == customer_id).order_by(CustomerInvestmentModel.created_at.desc())
+            query = self.db.query(CustomerInvestmentModel).options(noload(CustomerInvestmentModel.customer)).options(noload(CustomerInvestmentModel.transactions)).filter(CustomerInvestmentModel.customer_id == id).order_by(CustomerInvestmentModel.created_at.desc())
 
             if page and per_page:
                 offset = (page - 1) * per_page

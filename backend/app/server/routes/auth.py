@@ -37,7 +37,7 @@ def refresh_token(body: InvalidateTokenReq = Body(...)):
         raise exc
 
 @router.get('/check_user_exists')
-def check_user_exists(username: str = Query(..., alias="username")):
+def check_user_exists(username: str = Query(...)):
     try:
         flag = auth_repo.check_user_exists(username)
         msg = "User exists" if flag else "User does not exist"

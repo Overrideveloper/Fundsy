@@ -1,5 +1,7 @@
 const DAY = 86400, WEEK = 604800, MONTH = 2592000, YEAR = 31104000;
 
+const CURRENCY_HTML_SYMBOL = '&#8358';
+
 type durationType = ('days' | 'weeks' | 'months' | 'years');
 
 export const durationTypes: durationType[] = ['days', 'weeks', 'months', 'years'];
@@ -56,4 +58,20 @@ export function getDateStringFromDateTime(datetime: string) {
 
 export function formatAmountFromAPI(amount: number) {
   return amount / 100;
+}
+
+export function formatAmountToCurrency(value: number) {
+  if (!value || !Number.isFinite(value)) {
+      return '';
+  }
+  
+  let amount = value.toLocaleString('en', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  
+  if (amount.charAt(amount.indexOf('.') + 1) === '0' && amount.charAt(amount.indexOf('.') + 2) === '0') {
+      amount = amount.slice(0, amount.indexOf('.'));
+  }
+
+  const tempElement = document.createElement('span');
+  tempElement.innerHTML = `${CURRENCY_HTML_SYMBOL} ${amount}`;
+  return tempElement.innerText;
 }

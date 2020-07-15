@@ -39,7 +39,6 @@
     export default {
         name: 'Investments',
         components: { NavBar, Loader, Investment, AddInvestment, EditInvestment, DataTable },
-        notifications: { ...NOTIFICATIONS },
         data() {
             return {
                 title: 'Investments',
@@ -64,6 +63,7 @@
                 ]
             }
         },
+        notifications: { ...NOTIFICATIONS },
         created() {
             if (this.investments) {
                 this.isPageLoading = false;

@@ -221,7 +221,7 @@
       border: 1px solid var(--tertiary) !important;
       span {
         color: var(--dim-white);
-        text-transform: capitalize;
+        text-transform: capitalize !important;
       }
     }
   }

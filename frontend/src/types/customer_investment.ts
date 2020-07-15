@@ -14,3 +14,10 @@ export interface CustomerInvestmentRes {
     created_at: string;
     investment: InvestmentRes;
 }
+
+export interface CustomerInvestmentResOmitInvestment {
+    id: number;
+    title: string;
+    amount: number;
+    created_at: string;
+}

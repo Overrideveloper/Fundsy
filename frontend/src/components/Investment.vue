@@ -23,7 +23,7 @@
         name: 'Investment',
         props: ["investment", "btn_text"],
         computed: {
-            _investment() {
+            _investment: function() {
                 const { title, appreciation_amount, appreciation_duration, lock_period, withdrawal_cost }: InvestmentReq = this.$props.investment;
 
                 const { amount: appDurationAmount, type: appDurationType } = getDurationFromSeconds(appreciation_duration);

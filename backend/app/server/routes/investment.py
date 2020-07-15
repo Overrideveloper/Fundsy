@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Query, Path, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from data.schemas.core import Response, PaginatedResult
 from data.schemas.investment import InvestmentReq, InvestmentRes
-from server.middleware.auth import access_validator
+from server.middleware.auth import role_access_validator
 from data.database import db
 from data.repositories.investment import InvestmentRepository
 
@@ -11,7 +11,7 @@ investment_repo = InvestmentRepository(db)
 
 dump = InvestmentRes().dump
 dump_many = InvestmentRes(many=True).dump
-deps = [Depends(access_validator(True))]
+deps = [Depends(role_access_validator(True))]
 
 @router.post('', dependencies=deps)
 def create(body: InvestmentReq = Body(...)):
@@ -24,7 +24,7 @@ def create(body: InvestmentReq = Body(...)):
         raise exc
 
 @router.get('')
-def get_all(page: int = Query(alias="page", gt=0, default=None), per_page: int = Query(alias="per_page", gt=0, default=None)):
+def get_all(page: int = Query(gt=0, default=None), per_page: int = Query(gt=0, default=None)):
     try:
         result = investment_repo.get_all(page, per_page)
         data = PaginatedResult(data=dump_many(result[1]), total=result[0], page=page, per_page=per_page) if isinstance(result, tuple) else dump_many(result)

@@ -5,7 +5,6 @@ export const AUTHORIZE = 'MAIN';
 const mainRoute: RouteConfig = {
     path: '/main',
     component: () => import('../views/main/Home.vue'),
-    meta: { authorize: [AUTHORIZE] },
     children: [
       { path: '/', redirect: '/main/my-investments' },
       {

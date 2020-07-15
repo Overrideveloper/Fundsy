@@ -29,8 +29,8 @@ function replaceInCache(customerInvestment: CustomerInvestment) {
 }
 
 export function getCustomerInvestments<T = CustomerInvestment[] | PaginatedData<CustomerInvestment>>(customerId: number, query?: PaginationQuery) {
-    const url = query ? `/customer_investment?customer_id=${customerId}&page=${query.page}&per_page=${query.per_page}` :
-        `/customer_investment?customer_id=${customerId}`;
+    const baseURL = `/customer/${customerId}/customer_investment`;
+    const url = query ? `${baseURL}?page=${query.page}&per_page=${query.per_page}` : baseURL;
 
     return http.get<Response<T>>(url).then(({ data }) => {
         let customerInvestments: CustomerInvestment[] = [];
