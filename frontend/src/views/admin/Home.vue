@@ -15,7 +15,7 @@
     ]
 
     export default {
-        name: 'AdminHome',
+        name: 'Admin',
         components: {
             SideBar
         },
@@ -32,9 +32,5 @@
         background-color: var(--primary-dark);
         display: flex;
         overflow: auto !important;
-    }
-
-    .page-admin__main {
-        width: 100%;
     }
 </style>

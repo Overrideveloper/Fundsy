@@ -61,7 +61,7 @@
         padding: 1rem;
         margin: 0 16px 32px 16px;
         transition: all 500ms ease;
-        flex-grow: 1;
+        // flex-grow: 1;
 
         .investment__info {
             display: flex;
@@ -83,6 +83,7 @@
         word-break: break-word;
         white-space: break-spaces;
         width: 70%;
+        text-transform: capitalize;
     }
 
     .investment__meta {
@@ -92,13 +93,14 @@
     }
 
     .investment__btn {
-        background-color: var(--primary);
-        color: var(--tertiary);
+        background-color: var(--tertiary-alt);
+        color: var(--dim-white);
         border: none;
         padding: 0.2rem 1rem;
         display: block;
         margin: 0.5rem 0 0 auto;
         transition: all 500ms ease;
+        font-size: 16px;
         cursor: pointer;
 
         &:hover {

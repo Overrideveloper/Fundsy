@@ -98,11 +98,11 @@
     }
 
     .list__item {
-        height: 40px;
+        height: 48px;
         width: auto;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         border-radius: 4px;
         border: 1px solid var(--dim-white);
         cursor: pointer;
@@ -170,6 +170,10 @@
             &.sidemenu__logo__text-sm {
                 display: inherit !important;
             }
+        }
+
+        .list__item {
+            justify-content: center;
         }
 
         .list__item__icon {

@@ -4,6 +4,7 @@ from fastapi.exceptions import RequestValidationError, HTTPException
 from .routes.customer import router as customerRouter
 from .routes.auth import router as authRouter
 from .routes.investment import router as investmentRouter
+from .routes.customer_investment import router as customerInvestmentRouter
 from .middleware.exception_handlers import http_exception_handler, validation_exception_handler
 from .middleware.auth import authorization_validator
 from data.seed import seed_admin
@@ -28,3 +29,4 @@ def startup():
 app.include_router(customerRouter, prefix="/api/v1/customer", tags=["Customer"])
 app.include_router(authRouter, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(investmentRouter, prefix="/api/v1/investment", tags=["Investment"], dependencies=[Depends(authorization_validator)])
+app.include_router(customerInvestmentRouter, prefix="/api/v1/customer_investment", tags=["Customer", "Investment"], dependencies=[Depends(authorization_validator)])

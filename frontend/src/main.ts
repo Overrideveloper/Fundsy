@@ -5,12 +5,15 @@ import VueGoodTablePlugin from 'vue-good-table';
 import App from './App.vue'
 import router from './router'
 import { notificationOptions } from './services/notification';
+import { currencyFilter } from './filters';
 
-Vue.use(VueGoodTablePlugin);
 Vue.config.productionTip = false
 
+Vue.use(VueGoodTablePlugin);
 Vue.use(Vuelidate);
-Vue.use(VueNotifications, notificationOptions)
+Vue.use(VueNotifications, notificationOptions);
+
+Vue.filter('currency', currencyFilter);
 
 new Vue({
   router,

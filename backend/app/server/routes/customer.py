@@ -4,11 +4,11 @@ from data.schemas.core import Response, PaginatedResult
 from data.schemas.customer import CustomerRes, CustomerCreateReq, CustomerGetRes
 from data.repositories.customer import CustomerRepository
 from data.database import db
-from server.middleware.auth import admin_access_validator, authorization_validator
+from server.middleware.auth import access_validator, authorization_validator
 
 router = APIRouter()
 customer_repo = CustomerRepository(db)
-deps = [Depends(authorization_validator), Depends(admin_access_validator)]
+deps = [Depends(authorization_validator), Depends(access_validator(True))]
 
 @router.post('/signup')
 def signup(body: CustomerCreateReq = Body(...)):

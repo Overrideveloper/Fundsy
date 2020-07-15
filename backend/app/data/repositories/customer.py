@@ -34,6 +34,12 @@ class CustomerRepository(BaseRepository):
             return self.db.query(CustomerModel).filter(CustomerModel.user_id == user_id).first()
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
+    
+    def get_one(self, id: int) -> CustomerModel:
+        try:
+            return self.db.query(CustomerModel).get(id)
+        except:
+            raise HTTPException(status_code=500, detail="An error occured. Please try again")
             
     def get_all(self, page: int=None, per_page: int=None) -> Union[List[CustomerModel], tuple]:
         try:

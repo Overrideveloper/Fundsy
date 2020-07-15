@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import AdminRoute, { AUTHORIZE as ADMIN_AUTHORIZE } from './admin'
 import AuthRoutes from './auth'
-import CustomerRoutes, { AUTHORIZE as CUSTOMER_AUTHORIZE } from './customer'
+import CustomerRoute, { AUTHORIZE as CUSTOMER_AUTHORIZE } from './customer'
 import config from '@/common/config'
 import { homeRedirect } from './utils'
 import { currentUser } from '@/services/auth'
@@ -18,7 +18,7 @@ const routes: RouteConfig[] = [
     meta: { authorize: [] }
   },
   AdminRoute,
-  ...CustomerRoutes,
+  CustomerRoute,
   ...AuthRoutes,
   { path: '*', redirect: '/'}
 ];

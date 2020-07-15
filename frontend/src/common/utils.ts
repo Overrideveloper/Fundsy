@@ -53,3 +53,7 @@ export function getDateStringFromDateTime(datetime: string) {
   const date = new Date(datetime);
   return `${date.getDate()} ${MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
 }
+
+export function formatAmountFromAPI(amount: number) {
+  return amount / 100;
+}

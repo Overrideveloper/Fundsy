@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Query, Path, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from data.schemas.core import Response, PaginatedResult
 from data.schemas.investment import InvestmentReq, InvestmentRes
-from server.middleware.auth import admin_access_validator
+from server.middleware.auth import access_validator
 from data.database import db
 from data.repositories.investment import InvestmentRepository
 
@@ -11,7 +11,7 @@ investment_repo = InvestmentRepository(db)
 
 dump = InvestmentRes().dump
 dump_many = InvestmentRes(many=True).dump
-deps = [Depends(admin_access_validator)]
+deps = [Depends(access_validator(True))]
 
 @router.post('', dependencies=deps)
 def create(body: InvestmentReq = Body(...)):

@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, noload
 from .base import BaseRepository
 from typing import List, Union
 from data.schemas.investment import InvestmentReq
@@ -64,7 +64,7 @@ class InvestmentRepository(BaseRepository):
             
     def get_one(self, id: int) -> InvestmentModel:
         try:
-            return self.db.query(InvestmentModel).get(id)
+            return self.db.query(InvestmentModel).options(noload(InvestmentModel.customer_investments)).get(id)
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
     
@@ -74,11 +74,11 @@ class InvestmentRepository(BaseRepository):
                 offset = (page - 1) * per_page
                 
                 total = self.db.query(func.count(InvestmentModel.id)).scalar()
-                records = self.db.query(InvestmentModel).limit(per_page).offset(offset).all()
+                records = self.db.query(InvestmentModel).options(noload(InvestmentModel.customer_investments)).limit(per_page).offset(offset).all()
                 
                 return total, records
             else:
-                return self.db.query(InvestmentModel).all()
+                return self.db.query(InvestmentModel).options(noload(InvestmentModel.customer_investments)).all()
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
             

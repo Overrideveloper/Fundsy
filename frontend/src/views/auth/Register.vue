@@ -90,7 +90,7 @@ import router from '../../router';
 
                     signup(signupCredentials).then(_ => {
                         login(loginCredentials).then(_ => {
-                            router.replace('/myinvestments');
+                            router.replace('/main');
                             this.success({ message: 'Welcome to Fundsy' });
                         }).catch(err => {
                             this.error({ message: err });

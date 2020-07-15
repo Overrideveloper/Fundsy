@@ -1,2 +1,2 @@
-from .admin_access_validator import admin_access_validator
+from .access_validator import access_validator
 from .jwt_validator import authorization_validator
