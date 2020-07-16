@@ -7,7 +7,7 @@
 
             <template v-else>
                 <p class="page__intro">
-                    We have {{total}} investment option{{ total === 1 ? '' : 's'}} for you to choose from:</p>
+                    We have {{total}} investment option{{ total === 1 ? '' : 's'}} for you to choose from</p>
 
                 <div class="investments">
                     <Investment v-for="investment of investments" :key="investment.id" :investment="investment" btn_text="Invest now"

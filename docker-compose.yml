@@ -18,7 +18,7 @@ services:
             - "6379:6379"
         volumes:
             - fundsy:/redis
-    
+
     backend:
         build: ./backend
         command: bash -c "uvicorn app.server.app:app --host 0.0.0.0 --port 8000 --reload"
@@ -42,6 +42,6 @@ services:
             - "5050:80"
         depends_on:
             - db
-
 volumes:
     fundsy:
+        driver: local
