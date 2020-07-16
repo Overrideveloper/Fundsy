@@ -5,12 +5,17 @@ import { BehaviorSubject } from 'rxjs';
 import { CustomerInvestmentRes as CustomerInvestment, CustomerInvestmentCreateReq } from '@/types/customer_investment';
 
 export const customerInvestmentCache = new BehaviorSubject<CustomerInvestment[] | null>(null);
+export const customerInvestmentTotal = new BehaviorSubject<number>(0);
 
 function cacheCustomerInvestments(customerInvestments: CustomerInvestment[]) {
     let cache: CustomerInvestment[] = customerInvestmentCache.getValue() || [];
     cache = [ ...cache, ...customerInvestments ];
 
     customerInvestmentCache.next(Array.from(new Set(cache.map(c => c.id))).map(id => <CustomerInvestment> cache.find(c => c.id === id)));
+}
+
+function incrementCustomerInvestmentTotal() {
+    customerInvestmentTotal.next(customerInvestmentTotal.getValue() + 1);
 }
 
 function removeFromCache(id: number) {
@@ -36,9 +41,11 @@ export function getCustomerInvestments<T = CustomerInvestment[] | PaginatedData<
         let customerInvestments: CustomerInvestment[] = [];
 
         if (query) {
-            customerInvestments = (<PaginatedData<CustomerInvestment>> (data.data as any)).data;
+            const res = <PaginatedData<CustomerInvestment>> (data.data as any);
+            customerInvestments = res.data;
+            customerInvestmentTotal.next(res.total);
         } else {
-            customerInvestments = (<CustomerInvestment[]> (data.data as any))
+            customerInvestments = <CustomerInvestment[]> (data.data as any);
         }
 
         cacheCustomerInvestments(customerInvestments);
@@ -49,6 +56,7 @@ export function getCustomerInvestments<T = CustomerInvestment[] | PaginatedData<
 export function createCustomerInvestment(req: CustomerInvestmentCreateReq) {
     return http.post<Response<CustomerInvestment>>('/customer_investment', req).then(({ data }) => {
         cacheCustomerInvestments([data.data]);
+        incrementCustomerInvestmentTotal();
         return Promise.resolve(data.data);
     }).catch(err => Promise.reject(err));
 }

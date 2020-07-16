@@ -59,7 +59,7 @@ class AuthRepository(BaseRepository):
             auth_token_payload = redis.get(credentials.refresh_token)
             
             if auth_token_payload:
-                if auth_token_payload["id"] == credentials.user_id:
+                if auth_token_payload["user_id"] == credentials.user_id:
                     return signJWT(auth_token_payload)
                 else:
                     raise HTTPException(status_code=422, detail="Invalid credentials provided")   

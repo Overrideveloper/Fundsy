@@ -4,7 +4,7 @@
     <Loader v-if="isPageLoading" />
 
     <div class="page__main" v-else>
-      <Empty v-if="isEmpty" :text="emptyText" :actionLink="emptyLink" :actionText="emptyLinkText" :useAction="true" />
+      <Empty v-if="isEmpty" :text="emptyText" :actionLink="emptyLink" :actionText="emptyLinkText" :hasAction="true" />
 
       <template v-else>
           <p class="page__intro">You currently have {{total}} investment{{ total === 1 ? '' : 's'}}</p>
@@ -38,10 +38,10 @@
   import CustomerInvestment from '@/components/CustomerInvestment.vue';
   import { CurrentUser } from '../../types/auth';
   import { currentUser } from '../../services/auth';
-  import { customerInvestmentCache, getCustomerInvestments } from '../../services/customer_investment';
+  import { customerInvestmentCache, getCustomerInvestments, customerInvestmentTotal } from '../../services/customer_investment';
   import { PaginationQuery, PaginatedData } from '../../types';
   import { CustomerInvestmentRes } from '../../types/customer_investment';
-import { NOTIFICATIONS } from '../../services/notification';
+  import { NOTIFICATIONS } from '../../services/notification';
 
   export default {
     name: 'CustomerInvestments',
@@ -62,11 +62,14 @@ import { NOTIFICATIONS } from '../../services/notification';
     },
     notifications: { ...NOTIFICATIONS },
     created() {
+      this.customerInvestments = customerInvestmentCache.getValue();
+
       if (this.customerInvestments) {
         this.isPageLoading = false;
       }
 
       customerInvestmentCache.subscribe(val => this.customerInvestments = val);
+      customerInvestmentTotal.subscribe(val => this.total = val);
       this.loadCustomerInvestments(this.page, this.per_page)
     },
     computed: {
@@ -90,7 +93,6 @@ import { NOTIFICATIONS } from '../../services/notification';
         }
 
         getCustomerInvestments<PaginatedData<CustomerInvestmentRes>>(this.user.id, query).then((data: PaginatedData<CustomerInvestmentRes>) => {
-          this.total = data.total;
           this.isPageLoading = false;
           this.isMoreLoading = false;
 
@@ -98,6 +100,7 @@ import { NOTIFICATIONS } from '../../services/notification';
             this.page += 1;
           }
         }).catch(err => {
+          this.isMoreLoading = false;
           this.error({ message: err });
         });
       }
@@ -186,6 +189,12 @@ import { NOTIFICATIONS } from '../../services/notification';
       .new__investment__icon {
         fill: var(--dim-white);
       }
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .new__investment__link, .new__investment {
+      width: 100%
     }
   }
 </style>

@@ -13,6 +13,11 @@ const mainRoute: RouteConfig = {
         meta: { authorize: [AUTHORIZE] }
       },
       {
+        path: 'my-transactions',
+        component: () => import('../views/main/CustomerTransactions.vue'),
+        meta: { authorize: [AUTHORIZE] }
+      },
+      {
         path: 'invest',
         component: () => import('../views/main/Invest.vue'),
         meta: { authorize: [AUTHORIZE] }

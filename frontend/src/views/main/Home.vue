@@ -10,8 +10,8 @@
     import { SidebarRoute } from '../../types'; 
 
     const routes: SidebarRoute[] = [
-      { to: '/main/investments', name: 'My Investments', icon: 'briefcase' },
-      { to: '/main/transactions', name: 'My Transactions', icon: 'box-plot' },
+      { to: '/main/my-investments', name: 'My Investments', icon: 'briefcase' },
+      { to: '/main/my-transactions', name: 'My Transactions', icon: 'box-plot' },
       { to: '/main/invest', name: 'Invest', icon: 'view-cards' }
     ]
 

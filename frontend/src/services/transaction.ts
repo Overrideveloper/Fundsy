@@ -5,6 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Transaction } from '@/types/transaction';
 
 export const transactionCache = new BehaviorSubject<Transaction[] | null>(null);
+export const transactionTotal = new BehaviorSubject<number>(0);
 
 function cacheTransactions(transactions: Transaction[]) {
     let cache: Transaction[] = transactionCache.getValue() || [];
@@ -21,9 +22,14 @@ export function getCustomerTransactions<T = Transaction[] | PaginatedData<Transa
         let transactions: Transaction[] = [];
 
         if (query) {
-            transactions = (<PaginatedData<Transaction>> (data.data as any)).data;
+            const res = <PaginatedData<Transaction>> (data.data as any);
+            transactions = res.data;
+
+            if (cache) {
+                transactionTotal.next(res.total);
+            }
         } else {
-            transactions = (<Transaction[]> (data.data as any))
+            transactions = <Transaction[]> (data.data as any);
         }
 
         if (cache) {

@@ -3,7 +3,7 @@
         <clr-icon shape="block" class="empty__icon is-solid"></clr-icon>
         <span class="empty__text">{{text}}</span>
 
-        <template v-if="useAction">
+        <template v-if="hasAction">
             <router-link v-if="actionLink" :to="actionLink">
                 <button class="empty__button button">{{actionText}}</button>
             </router-link>
@@ -15,7 +15,7 @@
 <script lang="ts">
     export default {
         name: 'Empty',
-        props: ['text', 'actionLink', 'actionText', 'useAction'],
+        props: ['text', 'actionLink', 'actionText', 'hasAction'],
         methods: {
             triggerAction() {
                 this.$emit('actionTriggered')

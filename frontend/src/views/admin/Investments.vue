@@ -114,7 +114,7 @@
                 }
             },
             withdrawalCostFormatFn(value: number) {
-                return value ? 'None' : `${value}%`;
+                return value ? `${value}%` : 'None';
             },
             lockPeriodFormatFn(value: number) {
                 if (value) {
