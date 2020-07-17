@@ -5,7 +5,7 @@ from .base import BaseRepository
 from data.schemas.user import UserReq
 from data.models.core import User as UserModel
 from fastapi import HTTPException
-from .utils import hashPassword
+from .utils import hash_password
 
 class UserRepository(BaseRepository):
     def __init__(self, db: Session) -> None:
@@ -16,7 +16,7 @@ class UserRepository(BaseRepository):
         
     def create(self, _user: UserReq, is_admin=False) -> UserModel:
         try:
-            user = UserModel(username=_user.username, hash=hashPassword(_user.password), is_admin=is_admin);
+            user = UserModel(username=_user.username, hash=hash_password(_user.password), is_admin=is_admin);
 
             self.db.add(user)
             self.db.commit()

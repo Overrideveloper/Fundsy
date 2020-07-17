@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Numeric, Enum
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from .base import BaseModel, TransactionType
@@ -38,15 +38,15 @@ class Investment(Base, BaseModel):
     appreciation_duration = Column(Integer, nullable=False)
     lock_period = Column(Integer, nullable=False)
     withdrawal_cost = Column(Integer, nullable=False)
-    customer_investments = relationship("CustomerInvestment", back_populates="investment", passive_deletes=True)
+    customer_investments = relationship("CustomerInvestment", back_populates="investment")
     
 class CustomerInvestment(Base, BaseModel):
     __tablename__ = "customer_investment"
 
     title = Column(String, nullable=False)
-    amount = Column(Numeric, nullable=False)
-    appreciation = Column(Numeric, nullable=False, default=0)
-    investment_id = Column(Integer, ForeignKey("investment.id", ondelete="CASCADE"))
+    amount = Column(Integer, nullable=False)
+    appreciation = Column(Integer, nullable=False, default=0)
+    investment_id = Column(Integer, ForeignKey("investment.id"))
     customer_id = Column(Integer, ForeignKey("customer.id", ondelete="CASCADE"))
     investment = relationship("Investment", back_populates="customer_investments")
     customer = relationship("Customer", back_populates="customer_investments")
@@ -56,8 +56,9 @@ class CustomerInvestment(Base, BaseModel):
 class Transaction(Base, BaseModel):
     __tablename__ = "transaction"
     
-    amount = Column(Numeric, nullable=False)
+    amount = Column(Integer, nullable=False)
     type = Column(Enum(TransactionType), nullable=False)
+    description = Column(String, nullable=False)
     customer_investment_id = Column(Integer, ForeignKey("customer_investment.id", ondelete="CASCADE"))
     customer_id = Column(Integer, ForeignKey("customer.id", ondelete="CASCADE"))
     customer_investment = relationship("CustomerInvestment", back_populates="transactions")
@@ -66,7 +67,7 @@ class Transaction(Base, BaseModel):
 class AppreciationLog(Base, BaseModel):
     __tablename__ = "appreciation_log"
     
-    old_amount = Column(Numeric, nullable=False)
-    new_amount = Column(Numeric, nullable=False)
+    old_amount = Column(Integer, nullable=False)
+    new_amount = Column(Integer, nullable=False)
     customer_investment_id = Column(Integer, ForeignKey("customer_investment.id", ondelete="CASCADE"))
     customer_investment = relationship("CustomerInvestment", back_populates="appreciation_logs")

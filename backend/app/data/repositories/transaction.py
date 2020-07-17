@@ -4,7 +4,7 @@ from typing import List, Union
 
 from data.schemas.transaction import TransactionCreateReq
 from data.models.core import Transaction as TransactionModel
-from .utils import convertAmountToMinDenomination
+from .utils import convert_amount_to_min_denomination
 from .base import BaseRepository
 
 class TransactionRepository(BaseRepository):
@@ -13,12 +13,13 @@ class TransactionRepository(BaseRepository):
         
     def create(self, _transaction: TransactionCreateReq) -> TransactionModel:
         try:
-            amount = convertAmountToMinDenomination(_transaction.amount)
+            amount = _transaction.amount
             type = _transaction.type
             customer_investment_id = _transaction.customer_investment_id
             customer_id = _transaction.customer_id
+            description = _transaction.description
             
-            transaction = TransactionModel(amount=amount, type=type, customer_investment_id=customer_investment_id, customer_id=customer_id)
+            transaction = TransactionModel(amount=amount, description=description, type=type, customer_investment_id=customer_investment_id, customer_id=customer_id)
             
             self.db.add(transaction)
             self.db.commit()

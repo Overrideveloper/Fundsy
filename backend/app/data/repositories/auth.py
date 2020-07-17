@@ -5,8 +5,8 @@ from .user import UserRepository
 from .customer import CustomerRepository
 from .admin import AdminRepository
 from data.schemas.auth import LoginReq, RefreshTokenReq
-from .utils import checkPassword
-from common.utils import signJWT
+from .utils import check_password
+from common.utils import sign_jwt
 from data.schemas.customer import CustomerRes as Customer
 from data.schemas.admin import AdminRes as Admin
 from common.services import redis
@@ -24,7 +24,7 @@ class AuthRepository(BaseRepository):
             user = self.user_repo.get_by_username(credentials.username);
 
             if user:
-                if checkPassword(user.hash, credentials.password):
+                if check_password(user.hash, credentials.password):
                     data = None
 
                     if user.is_admin:
@@ -39,7 +39,7 @@ class AuthRepository(BaseRepository):
                             raise HTTPException(status_code=404, detail="Customer not found")
                     
                     auth_token_payload = { "id": data["id"], "user_id": user.id, "is_admin": user.is_admin  }
-                    auth_token = signJWT(auth_token_payload)
+                    auth_token = sign_jwt(auth_token_payload)
                     refresh_token = uuid4().hex
 
                     redis.set(refresh_token, auth_token_payload)
@@ -60,7 +60,7 @@ class AuthRepository(BaseRepository):
             
             if auth_token_payload:
                 if auth_token_payload["user_id"] == credentials.user_id:
-                    return signJWT(auth_token_payload)
+                    return sign_jwt(auth_token_payload)
                 else:
                     raise HTTPException(status_code=422, detail="Invalid credentials provided")   
             else:

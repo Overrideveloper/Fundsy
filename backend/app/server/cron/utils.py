@@ -1,5 +1,3 @@
-from decimal import Decimal
-
-def calculateDailyAppreciation(amount: int, rate: int, duration: int) -> Decimal:
+def calculateDailyAppreciation(amount: int, rate: int, duration: int) -> int:
     duration_in_days = int(duration/86400)
-    return Decimal((rate * amount)/(100 * duration_in_days))
+    return (rate * amount)/(100 * duration_in_days)
