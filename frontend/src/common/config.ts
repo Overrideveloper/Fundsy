@@ -5,4 +5,5 @@ export default {
     LS_USER_KEY: process.env.VUE_APP_LS_USER_KEY,
     LS_TOKEN_KEY: process.env.VUE_APP_LS_TOKEN_KEY,
     LS_REFRESH_KEY: process.env.VUE_APP_LS_REFRESH_KEY,
+    MIN_WITHDRAWAL: process.env.VUE_APP_MIN_WITHDRAWAL
 }

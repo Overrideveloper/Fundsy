@@ -24,7 +24,7 @@
         }
     }
 
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 768px) {
         .loader__container {
             margin-top: 20%;
 

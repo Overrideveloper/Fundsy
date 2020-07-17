@@ -13,7 +13,7 @@
                 <CustomerTransaction v-for="transaction of transactions" :key="transaction.id" :transaction="transaction" />
             </div>
 
-            <button @click="loadTransactions(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
+            <button @click.prevent="loadTransactions(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
         </template>
     </div>
   </div>
@@ -27,7 +27,7 @@
     import { CurrentUser } from '../../types/auth';
     import { currentUser } from '../../services/auth';
     import { NOTIFICATIONS } from '../../services/notification';
-    import { transactionCache, getCustomerTransactions, transactionTotal } from '../../services/transaction';
+    import { getCustomerTransactions } from '../../services/transaction';
     import { PaginationQuery, PaginatedData } from '../../types';
     import { CustomerInvestmentRes } from '../../types/customer_investment';
 
@@ -42,20 +42,15 @@
                 emptyText: 'You have not made any transactions yet',
                 transactions: null,
                 page: 1,
-                per_page: 10,
+                per_page: 4,
                 total: 0        
             }
         },
         notifications: { ...NOTIFICATIONS },
         created() {
-            this.transactions = transactionCache.getValue();
-
             if (this.transactions) {
                 this.isPageLoading = false;
             }
-
-            transactionCache.subscribe(val => this.transactions = val);
-            transactionTotal.subscribe(val => this.total = val);
             this.loadTransactions(this.page, this.per_page);
         },
         computed: {
@@ -81,6 +76,8 @@
                 getCustomerTransactions<PaginatedData<CustomerInvestmentRes>>(this.user.id, true, query).then((data: PaginatedData<CustomerInvestmentRes>) => {
                     this.isPageLoading = false;
                     this.isMoreLoading = false;
+                    this.total = data.total;
+                    this.transactions = [...(this.transactions || []), ...data.data];
 
                     if (data.data.length === per_page) {
                         this.page += 1;
@@ -122,25 +119,10 @@
     }
 
     .load__more__btn {
-        display: block;
         margin: 2rem auto;
-        padding: 1rem 2rem;
-        border-radius: 4px;
-        border: none;
-        background-color: #3b53ec1e;
-        color: var(--tertiary);
-        line-height: inherit;
-        height: inherit;
-        cursor: pointer;
-        font-size: 14px;
-
-        &:hover {
-            color: var(--dim-white);
-            background-color: var(--tertiary);   
-        }
     }
 
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 768px) {
         .transactions {      
             width: 100%;
         }

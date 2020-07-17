@@ -46,7 +46,10 @@
             }
         },
         created() {
+            this.customers = customerCache.getValue();
+
             if (this.customers) {
+                this.page = Math.floor(this.customers.length/this.per_page) + 1;
                 this.isPageLoading = false;
             }
 
@@ -73,7 +76,7 @@
                 }).catch(err => this.error({ message: err }));
             },
             handlePageChange() {
-                this.info('Fetching customers...')
+                this.info({ message: 'Fetching customers...' });
                 this.loadCustomers(this.page, this.per_page);
             },
             handleButtonClick(buttonId: string) { }

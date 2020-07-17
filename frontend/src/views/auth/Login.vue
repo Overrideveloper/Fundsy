@@ -193,7 +193,7 @@
         }
     }
 
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 768px) {
         .login__card {
             width: 80%;
         }

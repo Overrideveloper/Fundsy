@@ -7,7 +7,7 @@
             <router-link v-if="actionLink" :to="actionLink">
                 <button class="empty__button button">{{actionText}}</button>
             </router-link>
-            <button v-else @click="triggerAction" class="empty__button button">{{actionText}}</button>
+            <button v-else @click.prevent="triggerAction()" class="empty__button button">{{actionText}}</button>
         </template>
     </div>
 </template>

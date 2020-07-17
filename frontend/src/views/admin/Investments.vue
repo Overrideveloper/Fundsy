@@ -6,7 +6,7 @@
             <div class="page__main__controls">
                 <p class="investment__count">{{total}} investment{{ total === 1 ? '' : 's'}}</p>
 
-                <button  class="button new__button" @click="openAddModal">
+                <button  class="button new__button" @click.prevent="openAddModal()">
                     <clr-icon class="new__button__icon" shape="plus-circle"></clr-icon>
                     New investment
                 </button>
@@ -65,7 +65,10 @@
         },
         notifications: { ...NOTIFICATIONS },
         created() {
+            this.investments = investmentCache.getValue();
+
             if (this.investments) {
+                this.page = Math.floor(this.investments.length/this.per_page) + 1;
                 this.isPageLoading = false;
             }
 
@@ -133,7 +136,7 @@
                 return `${amount} ${type}`;
             },
             handlePageChange() {
-                this.info('Fetching investments...')
+                this.info({ message: 'Fetching investments...' });
                 this.loadInvestments(this.page, this.per_page);
             },
             handleButtonClick(buttonId: string, data: any) {

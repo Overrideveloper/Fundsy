@@ -61,7 +61,7 @@ export function formatAmountFromAPI(amount: number) {
 }
 
 export function formatAmountToCurrency(value: number) {
-  if (!value || !Number.isFinite(value)) {
+  if (!Number.isFinite(value)) {
       return '';
   }
   

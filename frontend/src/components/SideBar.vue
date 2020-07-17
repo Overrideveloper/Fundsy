@@ -17,7 +17,7 @@
 
         <ul class="menu-list sidemenu__settings">
             <li>
-                <button @click="logout()" class="list__item button list__item-btn" :class="{ 'is-loading': isLoggingOut }">
+                <button @click.prevent="logout()" class="list__item button list__item-btn" :class="{ 'is-loading': isLoggingOut }">
                     <clr-icon shape="logout" class="list__item-btn__icon is-solid"></clr-icon>
                     <span class="list__item-btn__text" >Logout</span>
                 </button>
@@ -163,7 +163,7 @@
         }
     }
 
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 768px) {
         .sidemenu__logo__text {
             display: none;
 

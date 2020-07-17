@@ -61,10 +61,10 @@ class CustomerInvestmentRepository(BaseRepository):
             self.db.rollback()
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
         
-    def get_by_customer_id(self, id: int, page: int=None, per_page: int=None) -> Union[List[CustomerInvestment], tuple]:
+    def get_by_customer_id(self, customer_id: int, page: int=None, per_page: int=None) -> Union[List[CustomerInvestment], tuple]:
         try:
             query = self.db.query(CustomerInvestment).options(noload(CustomerInvestment.customer)).options(noload(CustomerInvestment.transactions)).options(noload(CustomerInvestment.appreciation_logs))
-            filteredQuery = query.filter(CustomerInvestment.customer_id == id).order_by(CustomerInvestment.created_at.desc())
+            filteredQuery = query.filter(CustomerInvestment.customer_id == customer_id).order_by(CustomerInvestment.created_at.desc())
 
             if page and per_page:
                 offset = (page - 1) * per_page
@@ -78,6 +78,21 @@ class CustomerInvestmentRepository(BaseRepository):
         except:
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
     
+    def get_one(self, id: int, requesting_user_id: int) -> CustomerInvestment:
+        try:
+            query = self.db.query(CustomerInvestment).options(noload(CustomerInvestment.customer)).options(noload(CustomerInvestment.transactions)).options(noload(CustomerInvestment.appreciation_logs))
+            customer_investment = query.get(id)
+            
+            if not customer_investment:
+                raise HTTPException(status_code=404, detail="Customer investment not found")
+            
+            if requesting_user_id != customer_investment.customer_id:
+                raise HTTPException(status_code=403, detail="Access forbidden")
+
+            return customer_investment
+        except:
+            raise HTTPException(status_code=500, detail="An error occured. Please try again")
+     
     def get_all(self) -> List[CustomerInvestment]:
         try:
             query = self.db.query(CustomerInvestment).options(noload(CustomerInvestment.customer)).options(noload(CustomerInvestment.transactions)).options(noload(CustomerInvestment.appreciation_logs)).order_by(CustomerInvestment.created_at.desc())
@@ -94,7 +109,11 @@ class CustomerInvestmentRepository(BaseRepository):
                 raise HTTPException(status_code=404, detail="Customer Investment not found")
             
             new_appreciation = customer_investment.appreciation + appreciation
-            appreciation_log = AppreciationLogCreateReq(old_amount=customer_investment.appreciation, new_amount=new_appreciation, customer_investment_id=id)
+            
+            old_amount = customer_investment.amount + customer_investment.appreciation
+            new_amount = customer_investment.amount + new_appreciation
+            
+            appreciation_log = AppreciationLogCreateReq(old_amount=old_amount, new_amount=new_amount, customer_investment_id=id)
             customer_investment.appreciation = new_appreciation
             
             self.db.commit()
@@ -111,7 +130,7 @@ class CustomerInvestmentRepository(BaseRepository):
     def withdrawal_eligibility(self, id: int) -> bool:
         try:
             customer_investment = self.db.query(CustomerInvestment).get(id)
-            
+
             if not customer_investment:
                 raise HTTPException(status_code=404, detail="Customer Investment not found")
             

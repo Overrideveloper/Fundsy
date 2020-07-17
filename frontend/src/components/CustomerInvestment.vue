@@ -1,5 +1,5 @@
 <template>
-    <router-link class="customerinvestment__link" to="#">
+    <router-link class="customerinvestment__link" :to="link">
         <div class="customerinvestment">
             <div>
                 <div class="customerinvestment__info">
@@ -23,16 +23,20 @@
     import { formatAmountFromAPI, getDateStringFromDateTime } from '../common/utils';
 
     export default {
-        name: 'CustomerInvestment',
+        name: 'CustomerInvestmentComponent',
         props: ["customer_investment"],
         computed: {
             customerInvestment: function() {
-                const { title, amount: _amount, created_at, id, investment } = <CustomerInvestmentRes> this.$props.customer_investment;
+                const { title, amount: _amount, created_at, id, investment, appreciation } = <CustomerInvestmentRes> this.$props.customer_investment;
 
-                const amount = formatAmountFromAPI(_amount)
+                const amount = formatAmountFromAPI(_amount + appreciation)
                 const date = getDateStringFromDateTime(created_at)
 
                 return { id, title, amount, date, investment: investment.title };
+            },
+            link: function() {
+                const { id } = <CustomerInvestmentRes> this.$props.customer_investment;
+                return `/main/my-investments/${id}`;
             }
         }
     }
@@ -45,7 +49,7 @@
 
     .customerinvestment {
         height: auto;
-        width: 300px;
+        width: 250px;
         border: 1px solid var(--tertiary);
         border-radius: 8px;
         padding: 1rem;
@@ -110,7 +114,7 @@
         margin-right: 16px;
     }
 
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 768px) {
         .customerinvestment__link {
             flex-grow: 1;
         }

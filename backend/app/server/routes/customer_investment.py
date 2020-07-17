@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, Path, Query, Request
+from fastapi import APIRouter, Body, Depends, Path, Query, Request, HTTPException
 from fastapi.responses import JSONResponse
 from data.schemas.core import Response, PaginatedResult
 from data.schemas.customer_investment import CustomerInvestmentRes, CustomerInvestmentCreateReq, CustomerInvestmentWithdrawReq
@@ -7,7 +7,7 @@ from data.repositories.customer_investment import CustomerInvestmentRepository
 from data.repositories.appreciation_log import AppreciationLogRepository
 from server.middleware.auth import role_access_validator
 from data.database import db
-import simplejson as json
+from common.config import MIN_WITHDRAWAL
 
 router = APIRouter()
 customer_investment_repo = CustomerInvestmentRepository(db)
@@ -20,6 +20,19 @@ def create(body: CustomerInvestmentCreateReq = Body(...)):
         data = CustomerInvestmentRes().dump(customer_investment)
         
         res = Response(data=data, code=201, message="Customer investment created successfully")
+        return JSONResponse(content=res.dict(), status_code=res.code)
+    except Exception as exc:
+        raise exc
+
+@router.get('/{id}', dependencies=[Depends(role_access_validator(False))])
+def get_one(request: Request, id: int = Path(...)):
+    try:
+        requesting_user_id = request.state.user["id"]
+
+        customer_investment = customer_investment_repo.get_one(id, requesting_user_id)
+        data = CustomerInvestmentRes().dump(customer_investment)
+        res = Response(data=data, code=200, message="Customer investment returned")
+
         return JSONResponse(content=res.dict(), status_code=res.code)
     except Exception as exc:
         raise exc
@@ -72,6 +85,9 @@ def get_withdrawal_eligibility(id: int = Path(...)):
 @router.post('/withdraw', dependencies=[Depends(role_access_validator(False))])
 def withdraw(request: Request, body: CustomerInvestmentWithdrawReq):
     try:
+        if body.amount < MIN_WITHDRAWAL:
+            raise HTTPException(status_code=422, detail=f"Minimum amount withdrawable is {MIN_WITHDRAWAL}")
+
         requesting_user_id = request.state.user["id"]
 
         customer_investment = customer_investment_repo.withdraw(body.id, requesting_user_id, body.amount)

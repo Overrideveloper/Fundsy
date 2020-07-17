@@ -68,7 +68,7 @@
     import { NOTIFICATIONS, prompt } from '../../services/notification';
 
     export default {
-        name: 'AddInvestment',
+        name: 'AddInvestmentModal',
         data() {
             return {
                 durationTypes: durationTypes,

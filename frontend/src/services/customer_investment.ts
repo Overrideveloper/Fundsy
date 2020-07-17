@@ -2,7 +2,8 @@ import http from './http';
 import { PaginationQuery, PaginatedData } from '@/types';
 import { Response } from '@/types/http';
 import { BehaviorSubject } from 'rxjs';
-import { CustomerInvestmentRes as CustomerInvestment, CustomerInvestmentCreateReq } from '@/types/customer_investment';
+import { CustomerInvestmentRes as CustomerInvestment, CustomerInvestmentCreateReq, CustomerInvestmentWithdrawReq } from '@/types/customer_investment';
+import { AppreciationLogType } from '@/types/appreciation_log';
 
 export const customerInvestmentCache = new BehaviorSubject<CustomerInvestment[] | null>(null);
 export const customerInvestmentTotal = new BehaviorSubject<number>(0);
@@ -33,6 +34,11 @@ function replaceInCache(customerInvestment: CustomerInvestment) {
     }
 }
 
+export function getFromCustomerInvestmentCache(id: number) {
+    const cache: CustomerInvestment[] = customerInvestmentCache.getValue() || [];
+    return cache.find(c => c.id === id);
+}
+
 export function getCustomerInvestments<T = CustomerInvestment[] | PaginatedData<CustomerInvestment>>(customerId: number, query?: PaginationQuery) {
     const baseURL = `/customer/${customerId}/customer_investment`;
     const url = query ? `${baseURL}?page=${query.page}&per_page=${query.per_page}` : baseURL;
@@ -57,6 +63,49 @@ export function createCustomerInvestment(req: CustomerInvestmentCreateReq) {
     return http.post<Response<CustomerInvestment>>('/customer_investment', req).then(({ data }) => {
         cacheCustomerInvestments([data.data]);
         incrementCustomerInvestmentTotal();
+        return Promise.resolve(data.data);
+    }).catch(err => Promise.reject(err));
+}
+
+export function getCustomerInvestment(id: number) {
+    return http.get<Response<CustomerInvestment>>(`/customer_investment/${id}`).then(({ data }) => {
+        return Promise.resolve(data.data);
+    }).catch(err => Promise.reject(err));
+}
+
+export function getWithdrawalEligibility(id: number) {
+    return http.get<Response<boolean>>(`/customer_investment/${id}/withdrawal_eligibility`).then(({ data }) => {
+        return Promise.resolve(data.data);
+    }).catch(err => Promise.reject(err));
+}
+
+export function getMaxAmountWithdrawable(id: number) {
+    return http.get<Response<number>>(`/customer_investment/${id}/max_amount_withdrawable`).then(({ data }) => {
+        return Promise.resolve(data.data);
+    }).catch(err => Promise.reject(err));
+}
+
+export function withdrawFromCustomerInvestment(req: CustomerInvestmentWithdrawReq) {
+    return http.post<Response<CustomerInvestment>>(`/customer_investment/withdraw`, req).then(({ data }) => {
+        replaceInCache(data.data);
+        return Promise.resolve(data.data);
+    }).catch(err => Promise.reject(err));
+}
+
+export function getAppreciationLogs<T>(id: number, type?: AppreciationLogType, query?: PaginationQuery) {
+    let url = null;
+    
+    if (type && query) {
+        url = `/customer_investment/${id}/appreciation_log?type=${type}&page=${query.page}&per_page=${query.per_page}`;
+    } else if (!type && query) {
+        url = `/customer_investment/${id}/appreciation_log?page=${query.page}&per_page=${query.per_page}`;
+    } else if (type && !query) {
+        url = `/customer_investment/${id}/appreciation_log?type=${type}`;
+    } else {
+        url = `/customer_investment/${id}/appreciation_log`;
+    }
+    
+    return http.get<Response<T>>(url).then(({ data }) => {
         return Promise.resolve(data.data);
     }).catch(err => Promise.reject(err));
 }

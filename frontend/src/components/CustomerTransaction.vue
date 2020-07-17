@@ -1,7 +1,7 @@
 <template>
     <div class="transaction">
         <div class="transaction__info">
-            <h6 class="transaction__title">{{ _transaction.title }}</h6>
+            <h6 class="transaction__desc">{{ _transaction.description }} | {{ _transaction.title}} </h6>
             <h5 class="transaction__amount">{{ _transaction.amount | currency }}</h5>
         </div>
         <div class="transaction__info">
@@ -16,17 +16,17 @@
     import { Transaction, TransactionType } from '../types/transaction';
 
     export default {
-        name: 'CustomerTransaction',
+        name: 'CustomerTransactionComponent',
         props: ['transaction'],
         computed: {
             _transaction: function() {
-                const { type, amount: _amount, created_at, customer_investment } = <Transaction> this.$props.transaction;
+                const { description, type, amount: _amount, created_at, customer_investment } = <Transaction> this.$props.transaction;
 
                 const title = customer_investment.title;
                 const amount = formatAmountFromAPI(_amount);
                 const date = getDateStringFromDateTime(created_at);
 
-                return { title, amount, date, type }
+                return { description, title, amount, date, type }
             },
             isDebit: function() {
                 const { type } = <Transaction> this.$props.transaction;
@@ -63,7 +63,7 @@
             flex-wrap: wrap;
         }
 
-        .transaction__title {
+        .transaction__desc {
             color: var(--dim-white);
             font-size: 16px;
         }

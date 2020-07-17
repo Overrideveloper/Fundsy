@@ -34,11 +34,12 @@
                 isPageLoading: true,
                 columns: [
                     { label: "Date", field: "created_at", formatFn: getDateStringFromDateTime },
+                    { label: "Description", field: "description" },
                     { label: "Amount", field: "amount", formatFn: this.amountFormatFn },
                     { label: "Type", field: "type" }
                 ],
                 page: 1,
-                per_page: 10,
+                per_page: 5,
                 total: 0,
             }
         },
@@ -96,7 +97,7 @@
                 return formatAmountToCurrency(formatAmountFromAPI(value));
             },
             handlePageChange() {
-                this.info('Fetching investments...')
+                this.info({ message: 'Fetching investments...'})
                 this.loadCustomerTransactions(this.$route.params.id, this.page, this.per_page);
             }
         }

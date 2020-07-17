@@ -9,7 +9,7 @@
                 <h5 class="investment__meta">- Appreciates {{_investment.appreciationRate}}% in {{_investment.appreciationDuration}}</h5>
                 <h5 class="investment__meta">- {{_investment.lockPeriod}}</h5>
                 <h5 class="investment__meta">- {{_investment.withdrawalCost}}</h5>
-                <button class="investment__btn" @click="buttonClick">{{btn_text}}</button>
+                <button class="investment__btn" @click.prevent="buttonClick()">{{btn_text}}</button>
             </div>
         </div>
     </div>
@@ -20,7 +20,7 @@
     import { getDurationFromSeconds } from '../common/utils';
 
     export default {
-        name: 'Investment',
+        name: 'InvestmentComponent',
         props: ["investment", "btn_text"],
         computed: {
             _investment: function() {

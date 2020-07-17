@@ -12,6 +12,7 @@ class CustomerInvestmentRes(Schema):
     id = fields.Int()
     title = fields.Str()
     amount = fields.Int()
+    appreciation = fields.Int()
     created_at = fields.DateTime()
     investment = fields.Nested(InvestmentRes)
     

@@ -24,7 +24,7 @@
             <CustomerInvestment v-for="customerInvestment of customerInvestments" :key="customerInvestment.id" :customer_investment="customerInvestment" />
           </div>
           
-          <button @click="loadCustomerInvestments(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
+          <button @click.prevent="loadCustomerInvestments(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
       </template>
     </div>
   </div>
@@ -65,6 +65,7 @@
       this.customerInvestments = customerInvestmentCache.getValue();
 
       if (this.customerInvestments) {
+        this.page = Math.floor(this.customerInvestments.length/this.per_page) + 1;
         this.isPageLoading = false;
       }
 
@@ -120,25 +121,6 @@
   .page__intro {
     color: var(--dim-white);
     font-size: 20px;
-  }
-
-  .load__more__btn {
-    display: block;
-    margin: 1rem auto;
-    padding: 1rem 2rem;
-    border-radius: 4px;
-    border: none;
-    background-color: #3b53ec1e;
-    color: var(--tertiary);
-    line-height: inherit;
-    height: inherit;
-    cursor: pointer;
-    font-size: 14px;
-
-    &:hover {
-      color: var(--dim-white);
-      background-color: var(--tertiary);   
-    }
   }
 
   .page__customerinvestments {

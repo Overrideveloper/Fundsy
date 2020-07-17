@@ -12,23 +12,17 @@ class AppreciationLogResDaily(Schema):
     new_amount = fields.Int()
     created_at = fields.Str()
 
-class AppreciationLogResWeekly(Schema):
+class AppreciationLogResWeekly(AppreciationLogResDaily):
     week = fields.Int()
-    old_amount = fields.Int()
-    new_amount = fields.Int()
-    created_at = fields.Str()
+    year = fields.Int()
 
-class AppreciationLogResMonthly(Schema):
+class AppreciationLogResMonthly(AppreciationLogResDaily):
     month = fields.Int()
-    old_amount = fields.Int()
-    new_amount = fields.Int()
-    created_at = fields.Str()
+    year = fields.Int()
 
-class AppreciationLogResQuarterly(Schema):
+class AppreciationLogResQuarterly(AppreciationLogResDaily):
     quarter = fields.Int()
-    old_amount = fields.Int()
-    new_amount = fields.Int()
-    created_at = fields.Str()
+    year = fields.Int()
 
 class AppreciationLogReqQuery(Enum):
     WEEKLY = "weekly"

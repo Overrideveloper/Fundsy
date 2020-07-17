@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from typing import List, Union
-from sqlalchemy import extract, select, func
+from sqlalchemy import extract, select, func, desc, text
 from sqlalchemy.orm import Session, noload
 from .base import BaseRepository
 from data.models.core import AppreciationLog
@@ -42,7 +42,7 @@ class AppreciationLogRepository(BaseRepository):
     def get_by_customer_investment_weekly(self, customer_investment_id: int, page: int=None, per_page: int=None) -> Union[list, tuple]:
         try:
             res = self.db.execute(
-                select([extract("week", AppreciationLog.created_at).label("week"), func.max(AppreciationLog.created_at).label("created_at"), func.max(AppreciationLog.old_amount).label("old_amount"), func.max(AppreciationLog.new_amount).label("new_amount")]).group_by("week")
+                select([extract("week", AppreciationLog.created_at).label("week"), extract("year", AppreciationLog.created_at).label("year"), func.max(AppreciationLog.created_at).label("created_at"), func.max(AppreciationLog.old_amount).label("old_amount"), func.max(AppreciationLog.new_amount).label("new_amount")]).where(AppreciationLog.customer_investment_id == customer_investment_id).group_by(text("year, week")).order_by(desc(text("year, week")))
             )
 
             data = []
@@ -58,13 +58,14 @@ class AppreciationLogRepository(BaseRepository):
                 return total, data[offset:stop]
             else:
                 return data
-        except:
+        except Exception as exc:
+            print(exc)
             raise HTTPException(status_code=500, detail="An error occured. Please try again")
 
     def get_by_customer_investment_monthly(self, customer_investment_id: int, page: int=None, per_page: int=None) -> Union[list, tuple]:
         try:
             res = self.db.execute(
-                select([extract("month", AppreciationLog.created_at).label("month"), func.max(AppreciationLog.created_at).label("created_at"), func.max(AppreciationLog.old_amount).label("old_amount"), func.max(AppreciationLog.new_amount).label("new_amount")]).group_by("month")
+                select([extract("month", AppreciationLog.created_at).label("month"), extract("year", AppreciationLog.created_at).label("year"), func.max(AppreciationLog.created_at).label("created_at"), func.max(AppreciationLog.old_amount).label("old_amount"), func.max(AppreciationLog.new_amount).label("new_amount")]).where(AppreciationLog.customer_investment_id == customer_investment_id).group_by(text("year, month")).order_by(desc(text("year, month")))
             )
 
             data = []
@@ -86,7 +87,7 @@ class AppreciationLogRepository(BaseRepository):
     def get_by_customer_investment_quarterly(self, customer_investment_id: int, page: int=None, per_page: int=None) -> Union[list, tuple]:
         try:
             res = self.db.execute(
-                select([extract("quarter", AppreciationLog.created_at).label("quarter"), func.max(AppreciationLog.created_at).label("created_at"), func.max(AppreciationLog.old_amount).label("old_amount"), func.max(AppreciationLog.new_amount).label("new_amount")]).group_by("quarter")
+                select([extract("quarter", AppreciationLog.created_at).label("quarter"), extract("year", AppreciationLog.created_at).label("year"), func.max(AppreciationLog.created_at).label("created_at"), func.max(AppreciationLog.old_amount).label("old_amount"), func.max(AppreciationLog.new_amount).label("new_amount")]).where(AppreciationLog.customer_investment_id == customer_investment_id).group_by(text("year, quarter")).order_by(desc(text("year, quarter")))
             )
 
             data = []

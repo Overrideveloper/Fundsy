@@ -18,6 +18,11 @@ const mainRoute: RouteConfig = {
         meta: { authorize: [AUTHORIZE] }
       },
       {
+        path: 'my-investments/:id',
+        component: () => import('../views/main/SingleInvestment.vue'),
+        meta: { authorize: [AUTHORIZE] }
+      },
+      {
         path: 'invest',
         component: () => import('../views/main/Invest.vue'),
         meta: { authorize: [AUTHORIZE] }

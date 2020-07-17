@@ -14,7 +14,7 @@
                         @actionButtonClicked="onInvestmentActionButtonClick" />
                 </div>
                 
-                <button @click="loadInvestments(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
+                <button @click.prevent="loadInvestments(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
         
                 <InvestModal v-if="isInvestModalOpen" :investment="investmentToInvestIn" :customer_id="user.id" @close="onInvestModalCloseEmit" />
             </template>
@@ -53,7 +53,10 @@
             }
         },
         created() {
+            this.investments = investmentCache.getValue();
+
             if (this.investments) {
+                this.page = Math.floor(this.investments.length/this.per_page) + 1;
                 this.isPageLoading = false;
             }
 
@@ -159,25 +162,6 @@
             .new__investment__icon {
                 fill: var(--dim-white);
             }
-        }
-    }
-
-    .load__more__btn {
-        display: block;
-        margin: 1rem auto;
-        padding: 1rem 2rem;
-        border-radius: 4px;
-        border: none;
-        background-color: #3b53ec1e;
-        color: var(--tertiary);
-        line-height: inherit;
-        height: inherit;
-        cursor: pointer;
-        font-size: 14px;
-
-        &:hover {
-            color: var(--dim-white);
-            background-color: var(--tertiary);   
         }
     }
 </style>

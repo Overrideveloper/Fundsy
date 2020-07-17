@@ -178,7 +178,7 @@
     color: crimson;
   }
 
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 768px) {
     .modal-content {
       max-height: 100%;
     }
@@ -245,6 +245,78 @@
     &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
+    }
+  }
+
+  .load__more__btn {
+    display: block;
+    margin: 1rem auto;
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    border: none;
+    background-color: #3b53ec1e;
+    color: var(--tertiary);
+    line-height: inherit;
+    height: inherit;
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover {
+      color: var(--dim-white);
+      background-color: var(--tertiary);   
+    }
+  }
+
+  .appreciation__history {
+    .container {
+      margin: 1rem;
+      background-color: var(--tertiary-alt);
+      border-radius: 6px;
+      padding: 16px;
+      padding-bottom: 24px;
+    }
+    
+    .appreciation {
+      width: 100%;
+      padding-top: 4px;
+
+      .appreciation__info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .appreciation__date {
+        color: var(--dim-white);
+        font-size: 16px;
+      }
+
+      .transaction__amount {
+        color: var(--tertiary);
+        font-size: 20px;
+      }
+
+      &:not(:last-child) {
+        border-bottom: 0.5px solid var(--dim-white);
+        margin-bottom: 4px;
+        padding-bottom: 10px;
+      }
+
+      .appreciation__amount {
+        font-size: 16px;
+        color: var(--tertiary);
+
+        &.appreciation__amount-old {
+          color: var(--dim-white);
+        }
+      }
+
+      .appreciation__arrow {
+        font-size: 16px;
+        margin: 0 0.5rem;
+        color: green;
+      }
     }
   }
 </style>

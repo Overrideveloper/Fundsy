@@ -1,6 +1,6 @@
 from data.database import db
 from data.repositories.customer_investment import CustomerInvestmentRepository
-from server.cron.utils import calculateDailyAppreciation
+from server.cron.utils import calculate_daily_appreciation
 
 customer_investment_repo = CustomerInvestmentRepository(db)
 
@@ -16,7 +16,7 @@ def customer_investment_appreciation():
                 rate = investment.appreciation_amount
                 duration = investment.appreciation_duration
                 
-                daily_appreciation = calculateDailyAppreciation(amount, rate, duration)
+                daily_appreciation = calculate_daily_appreciation(amount, rate, duration)
                 customer_investment_repo.appreciate(id, daily_appreciation)
     except Exception as exc:
         print(exc)

@@ -51,7 +51,7 @@
                         <button class="modal__form__cancel button" @click.prevent="close()">Cancel</button>
 
                         <div class="modal__form__controls m-0">
-                            <button class="modal__form__danger button" :class="{ 'is-loading': isDeleteSubmitting }" @click.prevent="submitDelete">Delete</button>
+                            <button class="modal__form__danger button" :class="{ 'is-loading': isDeleteSubmitting }" @click.prevent="submitDelete()">Delete</button>
                             <button type="submit" class="modal__form__submit button" :class="{ 'is-loading': isEditSubmitting }" :disabled="$v.$invalid">Submit</button>
                         </div>
                     </div>
@@ -69,7 +69,7 @@
     import { NOTIFICATIONS, prompt } from '../../services/notification';
 
     export default {
-        name: 'EditInvestment',
+        name: 'EditInvestmentModal',
         props: ["investment"],
         data() {
             return {

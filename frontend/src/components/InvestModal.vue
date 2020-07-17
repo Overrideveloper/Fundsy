@@ -19,7 +19,7 @@
                     </div>
 
                     <div class="modal__form__controls">
-                        <button class="modal__form__cancel button" :disabled="isSubmitting" @click.prevent="close">Cancel</button>
+                        <button class="modal__form__cancel button" :disabled="isSubmitting" @click.prevent="close()">Cancel</button>
 
                         <div class="modal__form__controls m-0">
                             <button type="submit" class="modal__form__submit button" :class="{ 'is-loading': isSubmitting }" :disabled="$v.$invalid">Submit</button>
