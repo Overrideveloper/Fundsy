@@ -1,7 +1,7 @@
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv(".env", override=True)
+load_dotenv(".env", override=True)
 
 DATABASE_URI = os.getenv("DATABASE_URI")
 JWT_SECRET = os.getenv("JWT_SECRET")

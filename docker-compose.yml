@@ -28,13 +28,8 @@ services:
             - "8100:8000"
         environment:
             - DATABASE_URI=postgresql+psycopg2://postgres:postgres@db:5432/fundsy_dev
-            - JWT_SECRET=
-            - ADMIN_NAME=Administrator
-            - ADMIN_PASSWORD=
-            - ADMIN_USERNAME=
             - REDIS_HOST=redis
             - REDIS_PORT=6379
-            - MIN_WITHDRAWAL=50
         depends_on:
             - db
             - redis
@@ -52,7 +47,6 @@ services:
             - VUE_APP_LS_TOKEN_KEY=at
             - VUE_APP_LS_USER_KEY=usr
             - VUE_APP_LS_REFRESH_KEY=rt
-            - VUE_APP_MIN_WITHDRAWAL=50
         depends_on:
             - backend
 
