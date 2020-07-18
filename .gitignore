@@ -25,4 +25,5 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-**/migrations/versions/*.py
+**/migrations/versions/*
+!**/migrations/versions/.gitkeep
