@@ -12,6 +12,7 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import NavBar from '@/components/NavBar.vue';
     import Loader from '@/components/Loader.vue';
     import DataTable from '@/components/DataTable.vue';
@@ -22,86 +23,88 @@
     import { Transaction } from '../../types/transaction';
     import { NOTIFICATIONS } from '../../services/notification';
     import { getDateStringFromDateTime, formatAmountFromAPI, formatAmountToCurrency } from '../../common/utils';
-    import { PaginationQuery } from '../../types';
+    import { PaginationQuery, DatatableColumn, PaginatedData } from '../../types';
+    import { CustomerRes } from '../../types/customer';
 
-    export default {
-        name: 'Transactions',
+    @Component({
         components: { NavBar, Loader, DataTable },
-        data() {
-            return {
-                customer: null,
-                transactions: null,
-                isPageLoading: true,
-                columns: [
-                    { label: "Date", field: "created_at", formatFn: getDateStringFromDateTime },
-                    { label: "Description", field: "description" },
-                    { label: "Amount", field: "amount", formatFn: this.amountFormatFn },
-                    { label: "Type", field: "type" }
-                ],
-                page: 1,
-                per_page: 5,
-                total: 0,
-            }
-        },
-        notifications: { ...NOTIFICATIONS },
-        created() {
-            const customerId = Number(this.$route.params.id);
-            this.customer = getFromCustomerCache(customerId);
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class Transactions extends Vue {
+        customer: CustomerRes = null;
+        transactions: Transaction[] = null;
+        isPageLoading: boolean = true;
+        columns: DatatableColumn[] = [
+            { label: "Date", field: "created_at", formatFn: getDateStringFromDateTime },
+            { label: "Description", field: "description" },
+            { label: "Amount", field: "amount", formatFn: this.amountFormatFn },
+            { label: "Type", field: "type" }
+        ];
+        page: number = 1;
+        per_page: number = 5;
+        total: number = 0;
+        id: number = null;
 
-            if (!this.customer) {
-                this.loadCustomerInformation(customerId);
-            }
-
-            this.loadCustomerTransactions(customerId, this.page, this.per_page);
-        },
-        computed: {
-            user: function() {
-                const user = <CurrentUser> currentUser.getValue();
-                return { name: user.name, username: user.user.username };
-            },
-            title: function() {
-                if (this.customer) {
-                    return `${this.customer.name}'s Transactions`;
-                }
-
-                return 'Transactions';
-            }
-        },
-        methods: {
-            loadCustomerInformation(id: number) {
-                getCustomer(id).then(data => {
-                    this.customer = data;
-                }).catch(err => this.error({ message: err }));
-            },
-            loadCustomerTransactions(id: number, page: number, per_page: number) {
-                const query: PaginationQuery = { page, per_page };
-
-                getCustomerTransactions(id, false, query).then(data => {
-                    this.total = data.total;
-                    this.isPageLoading = false;
-
-                    if (data.data.length === per_page) {
-                        this.page += 1;
-                    }
-
-                    this.addTransactionsToList(data.data);
-                }).catch(err => this.error({ message: err }));
-            },
-            addTransactionsToList(transactions: Transaction[]) {
-                let list = this.transactions || [];
-                list = [...list, ...transactions];
-
-                this.transactions = Array.from(new Set(list.map(l => l.id))).map(id => <Transaction> list.find(l => l.id === id));
-            },
-            amountFormatFn(value: number) {
-                return formatAmountToCurrency(formatAmountFromAPI(value));
-            },
-            handlePageChange() {
-                this.info({ message: 'Fetching investments...'})
-                this.loadCustomerTransactions(this.$route.params.id, this.page, this.per_page);
-            }
+        get user() {
+            const user = <CurrentUser> currentUser.getValue();
+            return { name: user.name, username: user.user.username };
         }
 
+        get title() {
+            if (this.customer) {
+                return `${this.customer.name}'s Transactions`;
+            }
+
+            return 'Transactions';
+        }
+
+        created() {
+            this.id = Number(this.$route.params.id);
+            this.customer = getFromCustomerCache(this.id);
+
+            if (!this.customer) {
+                this.loadCustomerInformation(this.id);
+            }
+
+            this.loadCustomerTransactions(this.id, this.page, this.per_page);
+        }
+
+        loadCustomerInformation(id: number) {
+            getCustomer(id).then(data => {
+                this.customer = data;
+            }).catch(err => (<any>this).error({ message: err }));
+        }
+
+        loadCustomerTransactions(id: number, page: number, per_page: number) {
+            const query: PaginationQuery = { page, per_page };
+
+            getCustomerTransactions<PaginatedData<Transaction>>(id, query).then(data => {
+                this.total = data.total;
+                this.isPageLoading = false;
+
+                if (data.data.length === per_page) {
+                    this.page += 1;
+                }
+
+                this.addTransactionsToList(data.data);
+            }).catch(err => (<any> this).error({ message: err }));
+        }
+
+        addTransactionsToList(transactions: Transaction[]) {
+            let list = this.transactions || [];
+            list = [...list, ...transactions];
+
+            this.transactions = Array.from(new Set(list.map(l => l.id))).map(id => <Transaction> list.find(l => l.id === id));
+        }
+
+        amountFormatFn(value: number) {
+            return formatAmountToCurrency(formatAmountFromAPI(value));
+        }
+
+        handlePageChange() {
+            (<any> this).info({ message: 'Fetching investments...'})
+            this.loadCustomerTransactions(this.id, this.page, this.per_page);
+        }
     }
 </script>
 

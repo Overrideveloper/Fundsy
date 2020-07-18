@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session, noload
 from typing import List, Union
 from .base import BaseRepository
 from .user import UserRepository, UserReq
-from data.schemas.customer import CustomerCreateReq
-from data.models.core import Customer as CustomerModel
+from app.data.schemas.customer import CustomerCreateReq
+from app.data.models.core import Customer as CustomerModel
 
 class CustomerRepository(BaseRepository):
     def __init__(self, db: Session) -> None:

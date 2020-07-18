@@ -61,27 +61,14 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Emit } from 'vue-property-decorator';
     import { required, minValue } from 'vuelidate/lib/validators';
-    import { durationTypes, getSecondsFromDuration } from '../../common/utils';
+    import { durationTypes, getSecondsFromDuration, DurationType } from '../../common/utils';
     import { InvestmentReq } from '../../types/investment';
     import { createInvestment } from '../../services/investment';
     import { NOTIFICATIONS, prompt } from '../../services/notification';
 
-    export default {
-        name: 'AddInvestmentModal',
-        data() {
-            return {
-                durationTypes: durationTypes,
-                title: '',
-                appRate: null,
-                appDurationAmount: null,
-                appDurationType: null,
-                lockPeriodType: null,
-                lockPeriodAmount: null,
-                withdrawalCost: null,
-                isSubmitting: false
-            }
-        },
+    @Component({
         validations: {
             title: { required },
             appRate: { required, minValue: minValue(1) },
@@ -90,38 +77,50 @@
             lockPeriodAmount: { minValue: minValue(0) },
             withdrawalCost: { minValue: minValue(0) }
         },
-        notifications: { ...NOTIFICATIONS },
-        methods: {
-            close(addSuccess?: boolean) {
-                this.$emit('close', addSuccess);
-            },
-            submit() {
-                this.$v.$touch();
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class AddInvestmentModal extends Vue {
+        durationTypes: DurationType[] = durationTypes;
+        title: string = '';
+        appRate: number = null;
+        appDurationAmount: number = null;
+        appDurationType: DurationType = null;
+        lockPeriodType: DurationType = null;
+        lockPeriodAmount: number = null;
+        withdrawalCost: number = null;
+        isSubmitting: boolean = false;
 
-                if(!this.$v.$invalid) {
-                    prompt('info', 'Create investment', 'Are you sure?').then(willAct => {
-                        if (willAct) {
-                            const lock_period = (this.lockPeriodAmount && this.lockPeriodType) ? getSecondsFromDuration(this.lockPeriodType, this.lockPeriodAmount) : 0;
-                            const req: InvestmentReq = {
-                                title: this.title,
-                                appreciation_amount: this.appRate,
-                                appreciation_duration: getSecondsFromDuration(this.appDurationType, this.appDurationAmount),
-                                withdrawal_cost: this.withdrawalCost || 0,
-                                lock_period
-                            }
+        @Emit('close')
+        close(addSuccess?: boolean) {
+            return addSuccess;
+        }
 
-                            this.isSubmitting = true;
+        submit() {
+            this.$v.$touch();
 
-                            createInvestment(req).then(_ => {
-                                this.close(true);
-                                this.success({ message: 'New investment created'})
-                            }).catch(err => {
-                                this.isSubmitting = false;
-                                this.error({ message: err });
-                            });
+            if(!this.$v.$invalid) {
+                prompt('info', 'Create investment', 'Are you sure?').then(willAct => {
+                    if (willAct) {
+                        const lock_period = (this.lockPeriodAmount && this.lockPeriodType) ? getSecondsFromDuration(this.lockPeriodType, this.lockPeriodAmount) : 0;
+                        const req: InvestmentReq = {
+                            title: this.title,
+                            appreciation_amount: this.appRate,
+                            appreciation_duration: getSecondsFromDuration(this.appDurationType, this.appDurationAmount),
+                            withdrawal_cost: this.withdrawalCost || 0,
+                            lock_period
                         }
-                    })
-                }
+
+                        this.isSubmitting = true;
+
+                        createInvestment(req).then(_ => {
+                            this.close(true);
+                            (<any> this).success({ message: 'New investment created'})
+                        }).catch(err => {
+                            this.isSubmitting = false;
+                            (<any> this).error({ message: err });
+                        });
+                    }
+                })
             }
         }
     }

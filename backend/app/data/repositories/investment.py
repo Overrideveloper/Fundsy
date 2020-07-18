@@ -3,8 +3,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, noload
 from .base import BaseRepository
 from typing import List, Union
-from data.schemas.investment import InvestmentReq
-from data.models.core import Investment as InvestmentModel
+from app.data.schemas.investment import InvestmentReq
+from app.data.models.core import Investment as InvestmentModel
 
 class InvestmentRepository(BaseRepository):
     def __init__(self, db: Session) -> None:

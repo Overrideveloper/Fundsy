@@ -10,9 +10,12 @@
 </template>
 
 <script lang="ts">
-    export default {
-        name: 'NavBar',
-        props: ["title", "user"]
+    import { Component, Vue, Prop } from 'vue-property-decorator';
+    
+    @Component
+    export default class NavBar extends Vue {
+        @Prop({ required: true }) title!: string;
+        @Prop({ required: true }) user!: { name: string, username: string };
     }
 </script>
 

@@ -10,19 +10,20 @@
                     We have {{total}} investment option{{ total === 1 ? '' : 's'}} for you to choose from</p>
 
                 <div class="investments">
-                    <Investment v-for="investment of investments" :key="investment.id" :investment="investment" btn_text="Invest now"
+                    <Investment v-for="investment of investments" :key="investment.id" :investment="investment" btnText="Invest now"
                         @actionButtonClicked="onInvestmentActionButtonClick" />
                 </div>
                 
                 <button @click.prevent="loadInvestments(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
         
-                <InvestModal v-if="isInvestModalOpen" :investment="investmentToInvestIn" :customer_id="user.id" @close="onInvestModalCloseEmit" />
+                <InvestModal v-if="isInvestModalOpen" :investment="investmentToInvestIn" :customerId="user.id" @close="onInvestModalCloseEmit" />
             </template>
         </div>
     </div>
 </template>
 
 <script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import NavBar from '@/components/NavBar.vue';
     import Loader from '@/components/Loader.vue';
     import Empty from '@/components/Empty.vue';
@@ -35,23 +36,34 @@
     import { NOTIFICATIONS } from '../../services/notification';
     import { InvestmentRes } from '../../types/investment';
 
-    export default {
-        name: 'Invest',
+    @Component({
         components: { NavBar, Loader, Investment, Empty, InvestModal },
-        notifications: { ...NOTIFICATIONS },
-        data() {
-            return {
-                title: 'Invest',
-                investments: null,
-                isPageLoading: true,
-                isMoreLoading: false,
-                isInvestModalOpen: false,
-                investmentToInvestIn: null,
-                page: 1,
-                per_page: 10,
-                total: 0
-            }
-        },
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class Invest extends Vue {
+        title: string = 'Invest';
+        investments: InvestmentRes[] = null;
+        isPageLoading: boolean = true;
+        isMoreLoading: boolean = false;
+        isInvestModalOpen: boolean = false;
+        investmentToInvestIn: InvestmentRes = null;
+        page: number = 1;
+        per_page: number = 10;
+        total: number = 0;
+
+        get user() {
+            const user = <CurrentUser> currentUser.getValue();
+            return { id: user.id, name: user.name, username: user.user.username };
+        }
+
+        get isEmpty() {
+            return !this.investments || (this.investments && !this.investments.length)
+        }
+
+        get showLoadMore() {
+            return this.investments && this.investments.length !== this.total;
+        }
+
         created() {
             this.investments = investmentCache.getValue();
 
@@ -62,45 +74,34 @@
 
             investmentCache.subscribe(val => this.investments = val);
             this.loadInvestments(this.page, this.per_page);
-        },
-        computed: {
-            user: function() {
-                const user = <CurrentUser> currentUser.getValue();
-                return { id: user.id, name: user.name, username: user.user.username };
-            },
-            isEmpty: function() {
-                return !this.investments || (this.investments && !this.investments.length)
-            },
-            showLoadMore: function() {
-                return this.investments && this.investments.length !== this.total;
-            }
-        },
-        methods: {
-            loadInvestments(page: number, per_page: number, isMore?: boolean) {
-                const query: PaginationQuery = { page, per_page };
+        }
 
-                if (isMore) {
-                    this.isMoreLoading = true;
+        loadInvestments(page: number, per_page: number, isMore?: boolean) {
+            const query: PaginationQuery = { page, per_page };
+
+            if (isMore) {
+                this.isMoreLoading = true;
+            }
+
+            getInvestments<PaginatedData<InvestmentRes>>(query).then((data: PaginatedData<InvestmentRes>) => {
+                this.total = data.total;
+                this.isPageLoading = false;
+                this.isMoreLoading = false;
+
+                if (data.data.length === per_page) {
+                    this.page += 1;
                 }
+            }).catch(err => (<any> this).error({ message: err }));
+        }
 
-                getInvestments<PaginatedData<InvestmentRes>>(query).then((data: PaginatedData<InvestmentRes>) => {
-                    this.total = data.total;
-                    this.isPageLoading = false;
-                    this.isMoreLoading = false;
+        onInvestmentActionButtonClick(investment: InvestmentRes) {
+            this.investmentToInvestIn = investment;
+            this.isInvestModalOpen = true;
+        }
 
-                    if (data.data.length === per_page) {
-                        this.page += 1;
-                    }
-                }).catch(err => this.error({ message: err }));
-            },
-            onInvestmentActionButtonClick(investment: InvestmentRes) {
-                this.investmentToInvestIn = investment;
-                this.isInvestModalOpen = true;
-            },
-            onInvestModalCloseEmit() {
-                this.investmentToInvestIn = null;
-                this.isInvestModalOpen = false;
-            }
+        onInvestModalCloseEmit() {
+            this.investmentToInvestIn = null;
+            this.isInvestModalOpen = false;
         }
     }
 </script>

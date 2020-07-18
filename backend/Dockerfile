@@ -3,13 +3,13 @@ FROM python:3.7
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR /app
+WORKDIR /backend
 
-COPY ./requirements.txt /app/requirements.txt
-COPY ./alembic.ini /app/alembic.ini
+COPY ./requirements.txt /backend/requirements.txt
+COPY ./alembic.ini /backend/alembic.ini
 
-RUN pip install -r /app/requirements.txt
+RUN pip install -r /backend/requirements.txt
 
-COPY . /app/
+COPY . /backend/
 
 EXPOSE 8000

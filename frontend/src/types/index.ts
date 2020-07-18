@@ -16,3 +16,15 @@ export interface PaginatedData<T> {
     page: number;
     per_page: number;
 }
+
+export interface DatatableColumn {
+    label: string;
+    field: string;
+    formatFn?: Function;
+}
+
+export interface DatatableButton {
+    id: string;
+    link?: string;
+    displayText: string;
+}

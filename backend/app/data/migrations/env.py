@@ -7,12 +7,12 @@ from alembic import context
 
 import os
 import sys
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
-load_dotenv('.env', override=True)
+# load_dotenv('.env', override=True)
 
 import models.core as models
 

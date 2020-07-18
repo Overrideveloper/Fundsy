@@ -1,6 +1,6 @@
-from data.database import db
-from data.repositories.customer_investment import CustomerInvestmentRepository
-from server.cron.utils import calculate_daily_appreciation
+from app.data.database import db
+from app.data.repositories.customer_investment import CustomerInvestmentRepository
+from app.server.cron.utils import calculate_daily_appreciation
 
 customer_investment_repo = CustomerInvestmentRepository(db)
 

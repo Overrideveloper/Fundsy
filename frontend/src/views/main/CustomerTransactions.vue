@@ -20,6 +20,7 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import NavBar from '../../components/NavBar.vue';
     import Loader from '../../components/Loader.vue';
     import Empty from '../../components/Empty.vue';
@@ -29,64 +30,62 @@
     import { NOTIFICATIONS } from '../../services/notification';
     import { getCustomerTransactions } from '../../services/transaction';
     import { PaginationQuery, PaginatedData } from '../../types';
-    import { CustomerInvestmentRes } from '../../types/customer_investment';
+    import { Transaction } from '../../types/transaction';
 
-    export default {
-        name: 'CustomerTransactions',
+    @Component({
         components: { NavBar, Loader, Empty, CustomerTransaction },
-        data() {
-            return {
-                title: 'My Transactions',
-                isPageLoading: true,
-                isMoreLoading: false,
-                emptyText: 'You have not made any transactions yet',
-                transactions: null,
-                page: 1,
-                per_page: 4,
-                total: 0        
-            }
-        },
-        notifications: { ...NOTIFICATIONS },
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class CustomerTransactions extends Vue {
+        title: string = 'My Transactions';
+        isPageLoading: boolean = true;
+        isMoreLoading: boolean = false;
+        emptyText: string = 'You have not made any transactions yet';
+        transactions: Transaction[] = null;
+        page: number = 1;
+        per_page: number = 4;
+        total: number = 0;
+
+        get user() {
+            const user = <CurrentUser> currentUser.getValue();
+            return { id: user.id, name: user.name, username: user.user.username };
+        }
+
+        get isEmpty() {
+            return this.transactions && !this.transactions.length;
+        }
+
+        get showLoadMore() {
+            return this.transactions && this.transactions.length !== this.total;
+        }
+
         created() {
             if (this.transactions) {
                 this.isPageLoading = false;
             }
             this.loadTransactions(this.page, this.per_page);
-        },
-        computed: {
-            user: function() {
-                const user = <CurrentUser> currentUser.getValue();
-                return { id: user.id, name: user.name, username: user.user.username };
-            },
-            isEmpty: function() {
-                return this.transactions && !this.transactions.length;
-            },
-            showLoadMore: function() {
-                return this.transactions && this.transactions.length !== this.total;
-            }
-        },
-        methods: {
-            loadTransactions(page: number, per_page: number, isMore?: boolean) {
-                const query: PaginationQuery = { page, per_page };
+        }
 
-                if (isMore) {
-                    this.isMoreLoading = true;
+        loadTransactions(page: number, per_page: number, isMore?: boolean) {
+            const query: PaginationQuery = { page, per_page };
+
+            if (isMore) {
+                this.isMoreLoading = true;
+            }
+
+            getCustomerTransactions<PaginatedData<Transaction>>(this.user.id, query).then((data: PaginatedData<Transaction>) => {
+                this.isPageLoading = false;
+                this.isMoreLoading = false;
+                this.total = data.total;
+                this.transactions = [...(this.transactions || []), ...data.data];
+
+                if (data.data.length === per_page) {
+                    this.page += 1;
                 }
-
-                getCustomerTransactions<PaginatedData<CustomerInvestmentRes>>(this.user.id, true, query).then((data: PaginatedData<CustomerInvestmentRes>) => {
-                    this.isPageLoading = false;
-                    this.isMoreLoading = false;
-                    this.total = data.total;
-                    this.transactions = [...(this.transactions || []), ...data.data];
-
-                    if (data.data.length === per_page) {
-                        this.page += 1;
-                    }
-                }).catch(err => {
-                    this.isMoreLoading = false;
-                    this.error({ message: err });
-                });
-            }
+            }).catch(err => {
+                this.isMoreLoading = false;
+                (<any> this).error({ message: err });
+            });
         }
     }
 </script>

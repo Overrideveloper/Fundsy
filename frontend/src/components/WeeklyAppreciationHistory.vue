@@ -27,6 +27,7 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop } from 'vue-property-decorator';
     import Loader from './Loader.vue';
     import Empty from './Empty.vue';
     import { NOTIFICATIONS } from '../services/notification';
@@ -36,65 +37,66 @@
     import { PaginationQuery, PaginatedData } from '../types';
     import { getDateStringFromDateTime, formatAmountFromAPI } from '../common/utils';
 
-    export default {
-        name: 'WeeklyAppreciationHistory',
-        props: ['customerInvestment'],
+    @Component({
         components: { Loader, Empty },
-        data() {
-            return {
-                isLoading: false,
-                isMoreLoading: false,
-                logs: null,
-                page: 1,
-                per_page: 10,
-                total: 0
-            }
-        },
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class WeeklyAppreciationHistory extends Vue {
+        @Prop({ required: true }) customerInvestment!: CustomerInvestmentRes;
+
+        isLoading: boolean = false;
+        isMoreLoading: boolean = false;
+        logs: AppreciationLogResWeekly[] = null;
+        page: number = 1;
+        per_page: number = 10;
+        total: number = 0;
+
         created() {
             this.loadAppreciationHistory(this.page, this.per_page)
-        },
-        notifications: { ...NOTIFICATIONS },
-        computed: {
-            isEmpty: function() {
-                return this.logs && !this.logs.length;
-            },
-            showLoadMore: function() {
-                return this.logs && this.logs.length !== this.total;
+        }
+
+        get isEmpty() {
+            return this.logs && !this.logs.length;
+        }
+
+        get showLoadMore() {
+            return this.logs && this.logs.length !== this.total;
+        }
+
+        addLogsToList(logs: AppreciationLogResWeekly[]) {
+            let list: AppreciationLogResWeekly[] = this.logs || [];
+            list = [ ...list, ...logs ];
+
+            this.logs = Array.from(new Set(list.map(l => l.week))).map(week => <AppreciationLogResWeekly> list.find(c => c.week === week));
+        }
+
+        loadAppreciationHistory(page: number, per_page: number, isMore?: boolean) {
+            const { id } = this.customerInvestment;
+            const query: PaginationQuery = { page: this.page, per_page: this.per_page }
+
+            if (isMore) {
+                this.isMoreLoading = true;
             }
-        },
-        methods: {
-            addLogsToList(logs: AppreciationLogResWeekly[]) {
-                let list: AppreciationLogResWeekly[] = this.logs || [];
-                list = [ ...list, ...logs ];
 
-                this.logs = Array.from(new Set(list.map(l => l.week))).map(week => <AppreciationLogResWeekly> list.find(c => c.week === week));
-            },
-            loadAppreciationHistory(page: number, per_page: number, isMore?: boolean) {
-                const { id } = <CustomerInvestmentRes> this.$props.customerInvestment;
-                const query: PaginationQuery = { page: this.page, per_page: this.per_page }
+            getAppreciationLogs<PaginatedData<AppreciationLogResWeekly>>(id, AppreciationLogType.WEEKLY, query).then((data: PaginatedData<AppreciationLogResWeekly>) => {
+                this.total = data.total;
+                this.addLogsToList(data.data)
 
-                if (isMore) {
-                    this.isMoreLoading = true;
+                this.isMoreLoading = false;
+                this.isLoading = false;
+
+                if (data.data.length === per_page) {
+                    this.page += 1;
                 }
+            }).catch(err => (<any> this).error({ message: err }));
+        }
 
-                getAppreciationLogs<PaginatedData<AppreciationLogResWeekly>>(id, AppreciationLogType.WEEKLY, query).then((data: PaginatedData<AppreciationLogResWeekly>) => {
-                    this.total = data.total;
-                    this.addLogsToList(data.data)
+        formatDateString(date: string) {
+            return getDateStringFromDateTime(date);
+        }
 
-                    this.isMoreLoading = false;
-                    this.isLoading = false;
-
-                    if (data.data.length === per_page) {
-                        this.page += 1;
-                    }
-                }).catch(err => this.error({ message: err }));
-            },
-            formatDateString(date: string) {
-                return getDateStringFromDateTime(date);
-            },
-            formatAmount(amount: number) {
-                return formatAmountFromAPI(amount);
-            }
+        formatAmount(amount: number) {
+            return formatAmountFromAPI(amount);
         }
     }
 </script>

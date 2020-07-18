@@ -1,6 +1,6 @@
 from .database import db
 from .repositories.admin import AdminRepository, AdminCreateReq
-from common.config import ADMIN_NAME, ADMIN_PASSWORD, ADMIN_USERNAME
+from app.common.config import ADMIN_NAME, ADMIN_PASSWORD, ADMIN_USERNAME
 
 admin_repo = AdminRepository(db)
 

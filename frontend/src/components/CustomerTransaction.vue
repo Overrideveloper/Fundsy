@@ -12,26 +12,27 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop } from 'vue-property-decorator';
     import { formatAmountFromAPI, getDateStringFromDateTime } from '../common/utils';
     import { Transaction, TransactionType } from '../types/transaction';
 
-    export default {
-        name: 'CustomerTransactionComponent',
-        props: ['transaction'],
-        computed: {
-            _transaction: function() {
-                const { description, type, amount: _amount, created_at, customer_investment } = <Transaction> this.$props.transaction;
+    @Component
+    export default class CustomerTransactionComponent extends Vue {
+        @Prop({ required: true }) transaction!: Transaction;
+        
+        get _transaction() {
+            const { description, type, amount: _amount, created_at, customer_investment } = this.transaction;
 
-                const title = customer_investment.title;
-                const amount = formatAmountFromAPI(_amount);
-                const date = getDateStringFromDateTime(created_at);
+            const title = customer_investment.title;
+            const amount = formatAmountFromAPI(_amount);
+            const date = getDateStringFromDateTime(created_at);
 
-                return { description, title, amount, date, type }
-            },
-            isDebit: function() {
-                const { type } = <Transaction> this.$props.transaction;
-                return type === TransactionType.WITHDRAWAL;
-            }
+            return { description, title, amount, date, type }
+        }
+
+        get isDebit() {
+            const { type } = this.transaction;
+            return type === TransactionType.WITHDRAWAL;
         }
     }
 </script>

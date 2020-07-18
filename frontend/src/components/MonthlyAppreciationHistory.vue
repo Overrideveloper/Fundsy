@@ -26,6 +26,7 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop } from 'vue-property-decorator';
     import Loader from './Loader.vue';
     import Empty from './Empty.vue';
     import { NOTIFICATIONS } from '../services/notification';
@@ -35,65 +36,66 @@
     import { formatAmountFromAPI, MONTHS } from '../common/utils';
     import { PaginationQuery, PaginatedData } from '../types';
 
-    export default {
-        name: 'MonthlyAppreciationHistory',
-        props: ['customerInvestment'],
+    @Component({
         components: { Loader, Empty },
-        data() {
-            return {
-                isLoading: false,
-                isMoreLoading: false,
-                logs: null,
-                page: 1,
-                per_page: 1,
-                total: 0
-            }
-        },
+        notifications: { ...NOTIFICATIONS },
+    })
+    export default class MonthlyAppreciationHistory extends Vue {
+        @Prop({ required: true }) customerInvestment!: CustomerInvestmentRes;
+
+        isLoading: boolean = false;
+        isMoreLoading: boolean = false;
+        logs: AppreciationLogResMonthly[] = null;
+        page: number = 1;
+        per_page: number = 10;
+        total: number = 0;
+
         created() {
             this.loadAppreciationHistory(this.page, this.per_page)
-        },
-        notifications: { ...NOTIFICATIONS },
-        computed: {
-            isEmpty: function() {
-                return this.logs && !this.logs.length;
-            },
-            showLoadMore: function() {
-                return this.logs && this.logs.length !== this.total;
+        }
+
+        get isEmpty() {
+            return this.logs && !this.logs.length;
+        }
+
+        get showLoadMore() {
+            return this.logs && this.logs.length !== this.total;
+        }
+
+        addLogsToList(logs: AppreciationLogResMonthly[]) {
+            let list: AppreciationLogResMonthly[] = this.logs || [];
+            list = [ ...list, ...logs ];
+
+            this.logs = Array.from(new Set(list.map(l => l.month))).map(month => <AppreciationLogResMonthly> list.find(c => c.month === month));
+        }
+
+        loadAppreciationHistory(page: number, per_page: number, isMore?: boolean) {
+            const { id } = this.customerInvestment;
+
+            const query: PaginationQuery = { page: this.page, per_page: this.per_page }
+
+            if (isMore) {
+                this.isMoreLoading = true;
             }
-        },
-        methods: {
-            addLogsToList(logs: AppreciationLogResMonthly[]) {
-                let list: AppreciationLogResMonthly[] = this.logs || [];
-                list = [ ...list, ...logs ];
 
-                this.logs = Array.from(new Set(list.map(l => l.month))).map(month => <AppreciationLogResMonthly> list.find(c => c.month === month));
-            },
-            loadAppreciationHistory(page: number, per_page: number, isMore?: boolean) {
-                const { id } = <CustomerInvestmentRes> this.$props.customerInvestment;
+            getAppreciationLogs<PaginatedData<AppreciationLogResMonthly>>(id, AppreciationLogType.MONTHLY, query).then((data: PaginatedData<AppreciationLogResMonthly>) => {this.total = data.total;
+                this.addLogsToList(data.data)
 
-                const query: PaginationQuery = { page: this.page, per_page: this.per_page }
+                this.isMoreLoading = false;
+                this.isLoading = false;
 
-                if (isMore) {
-                    this.isMoreLoading = true;
+                if (data.data.length === per_page) {
+                    this.page += 1;
                 }
+            }).catch(err => (<any> this).error({ message: err }));
+        }
 
-                getAppreciationLogs<PaginatedData<AppreciationLogResMonthly>>(id, AppreciationLogType.MONTHLY, query).then((data: PaginatedData<AppreciationLogResMonthly>) => {this.total = data.total;
-                    this.addLogsToList(data.data)
+        formatMonth(month: number) {
+            return MONTHS[month - 1];
+        }
 
-                    this.isMoreLoading = false;
-                    this.isLoading = false;
-
-                    if (data.data.length === per_page) {
-                        this.page += 1;
-                    }
-                }).catch(err => this.error({ message: err }));
-            },
-            formatMonth(month: number) {
-                return MONTHS[month - 1];
-            },
-            formatAmount(amount: number) {
-                return formatAmountFromAPI(amount);
-            }
+        formatAmount(amount: number) {
+            return formatAmountFromAPI(amount);
         }
     }
 </script>

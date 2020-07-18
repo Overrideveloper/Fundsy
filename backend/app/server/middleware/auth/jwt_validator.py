@@ -1,7 +1,7 @@
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Request, HTTPException
 from starlette.status import HTTP_401_UNAUTHORIZED
-from common.utils import decode_jwt
+from app.common.utils import decode_jwt
 
 class JWTValidator(HTTPBearer):
     def __init__(self, auto_error: bool = True):

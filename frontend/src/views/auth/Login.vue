@@ -27,47 +27,44 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import router from '../../router';
     import { required, minLength } from 'vuelidate/lib/validators';
     import { LoginReq, CurrentUser } from '../../types/auth';
     import { login } from '../../services/auth';
     import { NOTIFICATIONS } from '../../services/notification';
 
-    export default {
-        name: 'Login',
-        data() {
-            return {
-                username: '',
-                password: '',
-                isSubmitting: false
-            }
-        },
+    @Component({
         validations: {
             username: { required },
             password: { required, minLength: minLength(7) }
         },
-        notifications: { ...NOTIFICATIONS },
-        methods: {
-            submit() {
-                this.$v.$touch();
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class Login extends Vue{
+        username: string = '';
+        password: string = '';
+        isSubmitting: boolean = false;
 
-                if(!this.$v.$invalid) {
-                    const credentials: LoginReq = { username: this.username, password: this.password };
-                    this.isSubmitting = true;
+        submit() {
+            this.$v.$touch();
 
-                    login(credentials).then((user: CurrentUser) => {
-                        if (user.user.is_admin) {
-                            router.replace('/admin');
-                        } else {
-                            router.replace('/main');
-                        }
+            if(!this.$v.$invalid) {
+                const credentials: LoginReq = { username: this.username, password: this.password };
+                this.isSubmitting = true;
 
-                        this.success({ message: 'Welcome back' })
-                    }).catch(err => {
-                        this.error({ message: err });
-                        this.isSubmitting = false;
-                    });
-                }
+                login(credentials).then((user: CurrentUser) => {
+                    if (user.user.is_admin) {
+                        router.replace('/admin');
+                    } else {
+                        router.replace('/main');
+                    }
+
+                    (<any> this).success({ message: 'Welcome back' })
+                }).catch(err => {
+                    (<any> this).error({ message: err });
+                    this.isSubmitting = false;
+                });
             }
         }
     }

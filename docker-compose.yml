@@ -3,8 +3,6 @@ version: "3"
 services:
     db:
         image: postgres:latest
-        volumes:
-            - fundsy:/db
         ports:
             - "5432:5432"
         environment:
@@ -16,22 +14,43 @@ services:
         image: redis:latest
         ports:
             - "6379:6379"
-        volumes:
-            - fundsy:/redis
 
     backend:
         build: ./backend
-        command: bash -c "uvicorn app.server.app:app --host 0.0.0.0 --port 8000 --reload"
+        command: bash -c "alembic revision --autogenerate && alembic upgrade head && uvicorn app.server.app:app --host 0.0.0.0 --port 8000 --reload"
         volumes:
-            - fundsy:/backend
+            - ./backend:/backend
         ports:
             - "8100:8000"
-        env_file:
-            - "./backend/.env"
+        environment:
+            - DATABASE_URI=postgresql+psycopg2://postgres:postgres@db:5432/fundsy_dev
+            - JWT_SECRET=
+            - ADMIN_NAME=Administrator
+            - ADMIN_PASSWORD=
+            - ADMIN_USERNAME=
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - MIN_WITHDRAWAL=50
         depends_on:
             - db
             - redis
     
+    frontend:
+        build: ./frontend
+        volumes:
+            - ./frontend:/frontend
+            - /frontend/node_modules
+        ports:
+            - "8081:8080"
+        environment:
+            - VUE_APP_API_URI=http://localhost:8100/api/v1
+            - VUE_APP_LS_TOKEN_KEY=at
+            - VUE_APP_LS_USER_KEY=usr
+            - VUE_APP_LS_REFRESH_KEY=rt
+            - VUE_APP_MIN_WITHDRAWAL=50
+        depends_on:
+            - backend
+
     pgadmin:
         container_name: pgadmin
         image: dpage/pgadmin4
@@ -42,6 +61,3 @@ services:
             - "5050:80"
         depends_on:
             - db
-volumes:
-    fundsy:
-        driver: local

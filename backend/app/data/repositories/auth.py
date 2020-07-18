@@ -4,12 +4,12 @@ from .base import BaseRepository
 from .user import UserRepository
 from .customer import CustomerRepository
 from .admin import AdminRepository
-from data.schemas.auth import LoginReq, RefreshTokenReq
+from app.data.schemas.auth import LoginReq, RefreshTokenReq
 from .utils import check_password
-from common.utils import sign_jwt
-from data.schemas.customer import CustomerRes as Customer
-from data.schemas.admin import AdminRes as Admin
-from common.services import redis
+from app.common.utils import sign_jwt
+from app.data.schemas.customer import CustomerRes as Customer
+from app.data.schemas.admin import AdminRes as Admin
+from app.common.services import redis
 from uuid import uuid4
 
 class AuthRepository(BaseRepository):

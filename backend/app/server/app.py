@@ -7,7 +7,7 @@ from .routes.investment import router as investmentRouter
 from .routes.customer_investment import router as customerInvestmentRouter
 from .middleware.exception_handlers import http_exception_handler, validation_exception_handler
 from .middleware.auth import authorization_validator
-from data.seed import seed_admin
+from app.data.seed import seed_admin
 from .cron import initialize as initialize_cron, shutdown as shutdown_cron
 
 app = FastAPI()

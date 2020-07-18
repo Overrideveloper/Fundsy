@@ -1,9 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, noload
 from typing import List, Union
-
-from data.schemas.transaction import TransactionCreateReq
-from data.models.core import Transaction as TransactionModel
+from app.data.schemas.transaction import TransactionCreateReq
+from app.data.models.core import Transaction as TransactionModel
 from .utils import convert_amount_to_min_denomination
 from .base import BaseRepository
 

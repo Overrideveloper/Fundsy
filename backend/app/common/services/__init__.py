@@ -1,1 +1,1 @@
-import common.services.redis_service as redis
+import app.common.services.redis_service as redis

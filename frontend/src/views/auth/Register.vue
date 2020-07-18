@@ -33,82 +33,78 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Watch } from 'vue-property-decorator';
     import { required, minLength } from 'vuelidate/lib/validators';
     import { doesUserExist, signup, login } from '../../services/auth';
     import { NOTIFICATIONS } from '../../services/notification';
     import { Subject } from 'rxjs';
     import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { SignupReq, LoginReq } from '../../types/auth';
-import router from '../../router';
+    import { SignupReq, LoginReq } from '../../types/auth';
+    import router from '../../router';
 
-    export default {
-        name: 'Register',
-        data() {
-            return {
-                name: '',
-                username: '',
-                password: '',
-                $username: new Subject<string>(),
-                _isUsernameUnique: true,
-                isSubmitting: false
-            }
-        },
+    @Component({
         validations: {
             name: { required },
             username: { required },
             password: { required, minLength: minLength(7) }
         },
-        notifications: { ...NOTIFICATIONS },
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class Register extends Vue {
+        name: string = '';
+        username: string = '';
+        password: string = '';
+        isSubmitting: boolean = false;
+        private usernameSubject: Subject<string> = new Subject<string>();
+        private _isUsernameUnique: boolean = true;
+
         created() {
-            this.isUsernameUnique(this.$data.$username).subscribe(flag => this.$data._isUsernameUnique = !flag);
-        },
-        computed: {
-            isFormValid: function() {
-                return !(this.$v.$invalid || !this.$data._isUsernameUnique)
-            }
-        },
-        methods: {
-            isUsernameUnique($username: Subject<string>) {
-                return $username.pipe(
-                    debounceTime(1000),
-                    distinctUntilChanged(),
-                    switchMap(async username => {
-                        try {
-                            return await doesUserExist(username);
-                        } catch (err) {
-                            return true;
-                        }
-                    })
-                );
-            },
-            submit() {
-                if (this.isFormValid) {
-                    const signupCredentials: SignupReq = { name: this.name, username: this.username, password: this.password };
-                    const loginCredentials: LoginReq = { username: this.username, password: this.password };
+            this.isUsernameUnique(this.usernameSubject).subscribe(flag => this._isUsernameUnique = !flag);
+        }
 
-                    this.isSubmitting = true;
+        get isFormValid() {
+            return !(this.$v.$invalid || !this._isUsernameUnique);
+        }
 
-                    signup(signupCredentials).then(_ => {
-                        login(loginCredentials).then(_ => {
-                            router.replace('/main');
-                            this.success({ message: 'Welcome to Fundsy' });
-                        }).catch(err => {
-                            this.error({ message: err });
-                            this.isSubmitting = false;
-                        });
+        private isUsernameUnique(usernameSubject: Subject<string>) {
+            return usernameSubject.pipe(
+                debounceTime(1000),
+                distinctUntilChanged(),
+                switchMap(async username => {
+                    try {
+                        return await doesUserExist(username);
+                    } catch (err) {
+                        return true;
+                    }
+                })
+            );
+        }
+
+        submit() {
+            if (this.isFormValid) {
+                const signupCredentials: SignupReq = { name: this.name, username: this.username, password: this.password };
+                const loginCredentials: LoginReq = { username: this.username, password: this.password };
+
+                this.isSubmitting = true;
+
+                signup(signupCredentials).then(_ => {
+                    login(loginCredentials).then(_ => {
+                        router.replace('/main');
+                        (<any> this).success({ message: 'Welcome to Fundsy' });
                     }).catch(err => {
-                        this.error({ message: err });
+                        (<any> this).error({ message: err });
                         this.isSubmitting = false;
                     });
-                }
+                }).catch(err => {
+                    (<any> this).error({ message: err });
+                    this.isSubmitting = false;
+                });
             }
-        },
-        watch: {
-            "username": {
-                handler: function(val) {
-                    this.$data.$username.next(val);
-                }
-            }
+        }
+
+        @Watch('username')
+        usernameChanged(val: string) {
+            this.usernameSubject.next(val);
         }
     }
 </script>

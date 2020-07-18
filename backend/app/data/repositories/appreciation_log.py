@@ -3,8 +3,8 @@ from typing import List, Union
 from sqlalchemy import extract, select, func, desc, text
 from sqlalchemy.orm import Session, noload
 from .base import BaseRepository
-from data.models.core import AppreciationLog
-from data.schemas.appreciation_log import AppreciationLogCreateReq
+from app.data.models.core import AppreciationLog
+from app.data.schemas.appreciation_log import AppreciationLogCreateReq
 
 class AppreciationLogRepository(BaseRepository):
     def __init__(self, db: Session) -> None:

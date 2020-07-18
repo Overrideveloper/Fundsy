@@ -32,48 +32,48 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
     import { required, minValue } from 'vuelidate/lib/validators';
     import { NOTIFICATIONS } from '../services/notification';
     import { CustomerInvestmentCreateReq } from '../types/customer_investment';
     import { createCustomerInvestment } from '../services/customer_investment';
+    import { InvestmentRes } from '../types/investment';
 
-    export default {
-        name: 'InvestModal',
-        props: ['investment', 'customer_id'],
-        data() {
-            return {
-                title: '',
-                amount: null,
-                isSubmitting: false
-            }
-        },
+    @Component({
         validations: {
             title: { required },
             amount: { required, minValue: minValue(1000) }
         },
-        notifications: { ...NOTIFICATIONS },
-        methods: {
-            close() {
-                this.$emit('close');
-            },
-            submit() {
-                const req: CustomerInvestmentCreateReq = {
-                    customer_id: this.$props.customer_id,
-                    title: this.title,
-                    amount: this.amount,
-                    investment_id: this.$props.investment.id
-                };
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class InvestModal extends Vue {
+        @Prop({ required: true }) investment!: InvestmentRes;
+        @Prop({ required: true }) customerId!: number;
 
-                this.isSubmitting = true;
+        title: string = '';
+        amount: number = null;
+        isSubmitting: boolean = false;
 
-                createCustomerInvestment(req).then(_ => {
-                    this.success({ message: `You have invested in ${this.$props.investment.title}`});
-                    this.close();
-                }).catch(err => {
-                    this.isSubmitting = false;
-                    this.error({ message: err });
-                });
-            }
+        @Emit('close')
+        close() { }
+
+        submit() {
+            const req: CustomerInvestmentCreateReq = {
+                customer_id: this.customerId,
+                title: this.title,
+                amount: this.amount,
+                investment_id: this.investment.id
+            };
+
+            this.isSubmitting = true;
+
+            createCustomerInvestment(req).then(_ => {
+                (<any> this).success({ message: `You have invested in ${this.investment.title}`});
+                this.close();
+            }).catch(err => {
+                this.isSubmitting = false;
+                (<any> this).error({ message: err });
+            });
         }
     }
 </script>

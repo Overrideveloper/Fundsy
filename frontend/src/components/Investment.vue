@@ -9,44 +9,45 @@
                 <h5 class="investment__meta">- Appreciates {{_investment.appreciationRate}}% in {{_investment.appreciationDuration}}</h5>
                 <h5 class="investment__meta">- {{_investment.lockPeriod}}</h5>
                 <h5 class="investment__meta">- {{_investment.withdrawalCost}}</h5>
-                <button class="investment__btn" @click.prevent="buttonClick()">{{btn_text}}</button>
+                <button class="investment__btn" @click.prevent="buttonClick()">{{btnText}}</button>
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-    import { InvestmentReq } from '../types/investment'
+    import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
+    import { InvestmentReq, InvestmentRes } from '../types/investment'
     import { getDurationFromSeconds } from '../common/utils';
 
-    export default {
-        name: 'InvestmentComponent',
-        props: ["investment", "btn_text"],
-        computed: {
-            _investment: function() {
-                const { title, appreciation_amount, appreciation_duration, lock_period, withdrawal_cost }: InvestmentReq = this.$props.investment;
+    @Component
+    export default class InvestmentComponent extends Vue {
+        @Prop({ required: true }) investment!: InvestmentRes;
+        @Prop({ required: true }) btnText!: string;
 
-                const { amount: appDurationAmount, type: appDurationType } = getDurationFromSeconds(appreciation_duration);
-                const appreciationDuration = `${appDurationAmount} ${appDurationType}`;
+        get _investment() {
+            const { title, appreciation_amount, appreciation_duration, lock_period, withdrawal_cost } = this.investment;
 
-                let withdrawalCost = 'No withdrawal fees', lockPeriod = 'No lock period';
+            const { amount: appDurationAmount, type: appDurationType } = getDurationFromSeconds(appreciation_duration);
+            const appreciationDuration = `${appDurationAmount} ${appDurationType}`;
 
-                if (withdrawal_cost) {
-                    withdrawalCost = `${withdrawal_cost}% withdrawal fees`;
-                }
+            let withdrawalCost = 'No withdrawal fees', lockPeriod = 'No lock period';
 
-                if (lock_period) {
-                    const duration = getDurationFromSeconds(lock_period);
-                    lockPeriod = `Lock period of ${duration.amount} ${duration.type}`;
-                }
-
-                return { title, withdrawalCost, lockPeriod, appreciationDuration, appreciationRate: appreciation_amount };
+            if (withdrawal_cost) {
+                withdrawalCost = `${withdrawal_cost}% withdrawal fees`;
             }
-        },
-        methods: {
-            buttonClick() {
-                this.$emit('actionButtonClicked', this.$props.investment);
+
+            if (lock_period) {
+                const duration = getDurationFromSeconds(lock_period);
+                lockPeriod = `Lock period of ${duration.amount} ${duration.type}`;
             }
+
+            return { title, withdrawalCost, lockPeriod, appreciationDuration, appreciationRate: appreciation_amount };
+        }
+
+        @Emit('actionButtonClicked')
+        buttonClick() {
+            return this.investment;
         }
     }
 </script>

@@ -13,14 +13,17 @@
 </template>
 
 <script lang="ts">
-    export default {
-        name: 'Empty',
-        props: ['text', 'actionLink', 'actionText', 'hasAction'],
-        methods: {
-            triggerAction() {
-                this.$emit('actionTriggered')
-            }
-        }
+    import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
+
+    @Component
+    export default class Empty extends Vue {
+        @Prop({ required: true }) text!: string;
+        @Prop() actionLink: string;
+        @Prop() actionText: string;
+        @Prop() hasAction: boolean;
+        
+        @Emit('actionTriggered')
+        triggerAction() { }
     }
 </script>
 

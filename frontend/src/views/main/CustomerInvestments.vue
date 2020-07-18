@@ -21,7 +21,7 @@
               </button>
             </router-link>
 
-            <CustomerInvestment v-for="customerInvestment of customerInvestments" :key="customerInvestment.id" :customer_investment="customerInvestment" />
+            <CustomerInvestment v-for="customerInvestment of customerInvestments" :key="customerInvestment.id" :customerInvestment="customerInvestment" />
           </div>
           
           <button @click.prevent="loadCustomerInvestments(page, per_page, true)" v-if="showLoadMore" class="load__more__btn button" :class="{ 'is-loading': isMoreLoading }">Load More</button>
@@ -31,6 +31,7 @@
 </template>
 
 <script lang="ts">
+  import { Component, Vue } from 'vue-property-decorator';
   import NavBar from '@/components/NavBar.vue';
   import SideBar from '@/components/SideBar.vue';
   import Loader from '@/components/Loader.vue';
@@ -43,24 +44,35 @@
   import { CustomerInvestmentRes } from '../../types/customer_investment';
   import { NOTIFICATIONS } from '../../services/notification';
 
-  export default {
-    name: 'CustomerInvestments',
+  @Component({
     components: { NavBar, SideBar, Empty, Loader, CustomerInvestment },
-    data() {
-      return {
-        title: 'My Investments',
-        emptyText: 'You have no investments yet.',
-        emptyLink: '/main/invest',
-        emptyLinkText: 'Make your first investment',
-        customerInvestments: null,
-        isPageLoading: true,
-        isMoreLoading: false,
-        page: 1,
-        per_page: 10,
-        total: 0
-      }
-    },
-    notifications: { ...NOTIFICATIONS },
+    notifications: { ...NOTIFICATIONS }
+  })
+  export default class CustomerInvestments extends Vue {
+    title: string = 'My Investments';
+    emptyText: string = 'You have no investments yet.';
+    emptyLink: string = '/main/invest';
+    emptyLinkText: string ='Make your first investment';
+    customerInvestments: CustomerInvestmentRes[] = null;
+    isPageLoading: boolean = true;
+    isMoreLoading: boolean = false;
+    page: number = 1;
+    per_page: number = 10;
+    total: number = 0;
+
+    get user() {
+      const user = <CurrentUser> currentUser.getValue();
+      return { id: user.id, name: user.name, username: user.user.username };
+    }
+
+    get isEmpty() {
+      return this.customerInvestments && !this.customerInvestments.length;
+    }
+
+    get showLoadMore() {
+      return this.customerInvestments && this.customerInvestments.length !== this.total;
+    }
+
     created() {
       this.customerInvestments = customerInvestmentCache.getValue();
 
@@ -72,39 +84,26 @@
       customerInvestmentCache.subscribe(val => this.customerInvestments = val);
       customerInvestmentTotal.subscribe(val => this.total = val);
       this.loadCustomerInvestments(this.page, this.per_page)
-    },
-    computed: {
-      user: function() {
-        const user = <CurrentUser> currentUser.getValue();
-        return { id: user.id, name: user.name, username: user.user.username };
-      },
-      isEmpty: function() {
-        return this.customerInvestments && !this.customerInvestments.length;
-      },
-      showLoadMore: function() {
-        return this.customerInvestments && this.customerInvestments.length !== this.total;
-      }
-    },
-    methods: {
-      loadCustomerInvestments(page: number, per_page: number, isMore?: boolean) {
-        const query: PaginationQuery = { page, per_page };
+    }
 
-        if (isMore) {
-          this.isMoreLoading = true;
+    loadCustomerInvestments(page: number, per_page: number, isMore?: boolean) {
+      const query: PaginationQuery = { page, per_page };
+
+      if (isMore) {
+        this.isMoreLoading = true;
+      }
+
+      getCustomerInvestments<PaginatedData<CustomerInvestmentRes>>(this.user.id, query).then((data: PaginatedData<CustomerInvestmentRes>) => {
+        this.isPageLoading = false;
+        this.isMoreLoading = false;
+
+        if (data.data.length === per_page) {
+          this.page += 1;
         }
-
-        getCustomerInvestments<PaginatedData<CustomerInvestmentRes>>(this.user.id, query).then((data: PaginatedData<CustomerInvestmentRes>) => {
-          this.isPageLoading = false;
-          this.isMoreLoading = false;
-
-          if (data.data.length === per_page) {
-            this.page += 1;
-          }
-        }).catch(err => {
-          this.isMoreLoading = false;
-          this.error({ message: err });
-        });
-      }
+      }).catch(err => {
+        this.isMoreLoading = false;
+        (<any> this).error({ message: err });
+      });
     }
   }
 </script>

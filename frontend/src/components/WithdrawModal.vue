@@ -30,55 +30,53 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
     import { required, minValue, maxValue } from 'vuelidate/lib/validators';
     import { NOTIFICATIONS } from '../services/notification';
     import { CustomerInvestmentRes, CustomerInvestmentWithdrawReq } from '../types/customer_investment';
     import { withdrawFromCustomerInvestment } from '../services/customer_investment';
     import config from '../common/config';
     
-    export default {
-        name: 'WithdrawModal',
-        props: ['maxWithdrawableAmount', 'customerInvestment'],
-        data() {
-            return {
-                amount: null,
-                minWithdrawable: Number(config.MIN_WITHDRAWAL),
-                isSubmitting: false
-            }
-        },
+    @Component({
         validations: {
             amount: { required, minValue: minValue(Number(config.MIN_WITHDRAWAL)) }
         },
-        notifications: { ...NOTIFICATIONS },
-        computed: {
-            withdrawalCost: function() {
-                const { withdrawal_cost } = (<CustomerInvestmentRes> this.$props.customerInvestment).investment;
-                return withdrawal_cost;
-            },
-            isFormValid: function() {
-                return !this.$v.$invalid && !(this.amount > this.$props.maxWithdrawableAmount)
-            }
-        },
-        methods: {
-            close(data?: CustomerInvestmentRes) {
-                this.$emit('close', data);
-            },
-            submit() {
-                const req: CustomerInvestmentWithdrawReq = {
-                    id: (<CustomerInvestmentRes> this.$props.customerInvestment).id,
-                    amount: this.amount,
-                };
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class WithdrawModal extends Vue {
+        @Prop({ required: true }) maxWithdrawableAmount!: number;
+        @Prop({ required: true }) customerInvestment!: CustomerInvestmentRes;
 
-                this.isSubmitting = true;
+        amount: number = null;
+        minWithdrawable: number = Number(config.MIN_WITHDRAWAL);
+        isSubmitting: boolean = false;
 
-                withdrawFromCustomerInvestment(req).then(data => {
-                    this.success({ message: 'Withdrawal successful '});
-                    this.close(data);
-                }).catch(err => {
-                    this.isSubmitting = false;
-                    this.error({ message: err });
-                });
-            }
+        get withdrawalCost() {
+            const { withdrawal_cost } = this.customerInvestment.investment;
+            return withdrawal_cost;
+        }
+
+        get isFormValid() {
+            return !this.$v.$invalid && !(this.amount > this.maxWithdrawableAmount)
+        }
+
+        @Emit('close')
+        close(data?: CustomerInvestmentRes) {
+            return data;
+        }
+
+        submit() {
+            const req: CustomerInvestmentWithdrawReq = { id: this.customerInvestment.id, amount: this.amount };
+
+            this.isSubmitting = true;
+
+            withdrawFromCustomerInvestment(req).then(data => {
+                (<any> this).success({ message: 'Withdrawal successful '});
+                this.close(data);
+            }).catch(err => {
+                this.isSubmitting = false;
+                (<any> this).error({ message: err });
+            });
         }
     }
 </script>

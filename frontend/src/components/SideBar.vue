@@ -27,32 +27,31 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop } from 'vue-property-decorator';
     import { logout } from '../services/auth'
     import { NOTIFICATIONS, prompt } from '../services/notification'
     import router from '../router'
+    import { SidebarRoute } from '../types';
 
-    export default {
-        name: 'SideBar',
-        props: ["routes"],
-        notifications: { ...NOTIFICATIONS },
-        data() {
-            return {
-                isLoggingOut: false
-            }
-        },
-        methods: {
-            logout() {
-                prompt('warning', 'Log out', 'Are you sure?', true).then(willAct => {
-                    if (willAct) {
-                        this.isLoggingOut = true;
+    @Component({
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class SideBar extends Vue {
+        @Prop({ required: true }) routes!: SidebarRoute[];
+        
+        isLoggingOut: boolean = false
+        
+        logout() {
+            prompt('warning', 'Log out', 'Are you sure?', true).then(willAct => {
+                if (willAct) {
+                    this.isLoggingOut = true;
 
-                        logout().then(_ => router.replace('/login')).catch(err => {
-                            this.error({ message: err });
-                            this.isLoggingOut = false;
-                        });
-                    }
-                });
-            }
+                    logout().then(_ => router.replace('/login')).catch(err => {
+                        (<any> this).error({ message: err });
+                        this.isLoggingOut = false;
+                    });
+                }
+            });
         }
     }
 </script>

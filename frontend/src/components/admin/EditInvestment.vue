@@ -62,33 +62,14 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
     import { required, minValue } from 'vuelidate/lib/validators';
-    import { durationTypes, getSecondsFromDuration, getDurationFromSeconds } from '../../common/utils';
-    import { InvestmentReq } from '../../types/investment';
+    import { durationTypes, getSecondsFromDuration, getDurationFromSeconds, DurationType } from '../../common/utils';
+    import { InvestmentReq, InvestmentRes } from '../../types/investment';
     import { editInvestment, deleteInvestment } from '../../services/investment';
     import { NOTIFICATIONS, prompt } from '../../services/notification';
 
-    export default {
-        name: 'EditInvestmentModal',
-        props: ["investment"],
-        data() {
-            return {
-                durationTypes: durationTypes,
-                id: null,
-                title: '',
-                appRate: null,
-                appDurationAmount: null,
-                appDurationType: null,
-                lockPeriodType: null,
-                lockPeriodAmount: null,
-                withdrawalCost: null,
-                isEditSubmitting: false,
-                isDeleteSubmitting: false
-            }
-        },
-        created() {
-            this.parseInvestmentPropToForm();
-        },
+    @Component({
         validations: {
             title: { required },
             appRate: { required, minValue: minValue(1) },
@@ -97,71 +78,93 @@
             lockPeriodAmount: { minValue: minValue(0) },
             withdrawalCost: { minValue: minValue(0) }
         },
-        notifications: { ...NOTIFICATIONS },
-        methods: {
-            parseInvestmentPropToForm() {
-                const { title, appreciation_amount, appreciation_duration, lock_period, withdrawal_cost }: InvestmentReq = this.$props.investment;
-                const { amount: appDurationAmount, type: appDurationType } = getDurationFromSeconds(appreciation_duration);
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class EditInvestmentModal extends Vue {
+        @Prop({ required: true }) investment!: InvestmentRes;
+        
+        durationTypes: DurationType[] = durationTypes;
+        id: number = null;
+        title: string = '';
+        appRate: number = null;
+        appDurationAmount: number = null;
+        appDurationType: DurationType = null;
+        lockPeriodType: DurationType = null;
+        lockPeriodAmount: number = null;
+        withdrawalCost: number = null;
+        isEditSubmitting: boolean = false;
+        isDeleteSubmitting: boolean = false;
 
-                this.id = this.$props.investment.id;
-                this.title = title;
-                this.appRate = appreciation_amount;
-                this.appDurationAmount = appDurationAmount;
-                this.appDurationType = appDurationType;
-                this.withdrawalCost = withdrawal_cost ? withdrawal_cost : null;
+        created() {
+            this.parseInvestmentPropToForm();
+        }
 
-                if (lock_period) {
-                    const duration = getDurationFromSeconds(lock_period);
-                    this.lockPeriodType = duration.type;
-                    this.lockPeriodAmount = duration.amount;
-                }
-            },
-            close(deleteSuccess?: boolean) {
-                this.$emit('close', deleteSuccess);
-            },
-            submitEdit() {
-                this.$v.$touch();
+        parseInvestmentPropToForm() {
+            const { title, appreciation_amount, appreciation_duration, lock_period, withdrawal_cost } = this.investment;
+            const { amount: appDurationAmount, type: appDurationType } = getDurationFromSeconds(appreciation_duration);
 
-                if(!this.$v.$invalid) {
-                    prompt('info', 'Edit investment', 'Are you sure?').then(willAct => {
-                        if (willAct) {
-                            const lock_period = (this.lockPeriodAmount && this.lockPeriodType) ? getSecondsFromDuration(this.lockPeriodType, this.lockPeriodAmount) : 0;
-                            const req: InvestmentReq = {
-                                title: this.title,
-                                appreciation_amount: this.appRate,
-                                appreciation_duration: getSecondsFromDuration(this.appDurationType, this.appDurationAmount),
-                                withdrawal_cost: this.withdrawalCost || 0,
-                                lock_period
-                            }
+            this.id = this.investment.id;
+            this.title = title;
+            this.appRate = appreciation_amount;
+            this.appDurationAmount = appDurationAmount;
+            this.appDurationType = appDurationType;
+            this.withdrawalCost = withdrawal_cost ? withdrawal_cost : null;
 
-                            this.isEditSubmitting = true;
+            if (lock_period) {
+                const duration = getDurationFromSeconds(lock_period);
+                this.lockPeriodType = duration.type;
+                this.lockPeriodAmount = duration.amount;
+            }
+        }
 
-                            editInvestment(this.id, req).then(_ => {
-                                this.close();
-                                this.success({ message: 'Investment edited'})
-                            }).catch(err => {
-                                this.isEditSubmitting = false;
-                                this.error({ message: err });
-                            });
-                        }
-                    });
-                }
-            },
-            submitDelete() {
-                prompt('warning', 'Delete investment', 'Are you sure?', true).then(willAct => {
+        @Emit('close')
+        close(deleteSuccess?: boolean) {
+            return deleteSuccess;
+        }
+
+        submitEdit() {
+            this.$v.$touch();
+
+            if(!this.$v.$invalid) {
+                prompt('info', 'Edit investment', 'Are you sure?').then(willAct => {
                     if (willAct) {
-                        this.isDeleteSubmitting = true;
+                        const lock_period = (this.lockPeriodAmount && this.lockPeriodType) ? getSecondsFromDuration(this.lockPeriodType, this.lockPeriodAmount) : 0;
+                        const req: InvestmentReq = {
+                            title: this.title,
+                            appreciation_amount: this.appRate,
+                            appreciation_duration: getSecondsFromDuration(this.appDurationType, this.appDurationAmount),
+                            withdrawal_cost: this.withdrawalCost || 0,
+                            lock_period
+                        }
 
-                        deleteInvestment(this.id).then(_ => {
-                            this.close(true);
-                            this.success({ message: 'Investment deleted'})
+                        this.isEditSubmitting = true;
+
+                        editInvestment(this.id, req).then(_ => {
+                            this.close();
+                            (<any> this).success({ message: 'Investment edited'})
                         }).catch(err => {
-                            this.isDeleteSubmitting = false;
-                            this.error({ message: err });
+                            this.isEditSubmitting = false;
+                            (<any> this).error({ message: err });
                         });
                     }
                 });
             }
+        }
+
+        submitDelete() {
+            prompt('warning', 'Delete investment', 'Are you sure?', true).then(willAct => {
+                if (willAct) {
+                    this.isDeleteSubmitting = true;
+
+                    deleteInvestment(this.id).then(_ => {
+                        this.close(true);
+                        (<any> this).success({ message: 'Investment deleted'})
+                    }).catch(err => {
+                        this.isDeleteSubmitting = false;
+                        (<any> this).error({ message: err });
+                    });
+                }
+            });
         }
     }
 </script>

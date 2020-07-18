@@ -2,8 +2,8 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from .base import BaseRepository
-from data.schemas.user import UserReq
-from data.models.core import User as UserModel
+from app.data.schemas.user import UserReq
+from app.data.models.core import User as UserModel
 from fastapi import HTTPException
 from .utils import hash_password
 

@@ -6,12 +6,13 @@
             <p class="customer__count">{{total}} customer{{ total === 1 ? '' : 's'}}</p>
 
             <DataTable :columns="columns" :rows="customers" :total="total" :per_page="per_page" :buttons="buttons"
-            @pageChange="handlePageChange" @buttonClick="handleButtonClick" />
+            @pageChange="handlePageChange" />
         </div>
     </div>
 </template>
 
 <script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import NavBar from '@/components/NavBar.vue';
     import Loader from '@/components/Loader.vue';
     import DataTable from '@/components/DataTable.vue';
@@ -19,32 +20,35 @@
     import { customerCache, getCustomers } from '../../services/customer';
     import { CustomerRes as Customer } from '../../types/customer';
     import { CurrentUser } from '../../types/auth';
-    import { PaginationQuery, PaginatedData } from '../../types';
+    import { PaginationQuery, PaginatedData, DatatableColumn, DatatableButton } from '../../types';
     import { NOTIFICATIONS } from '../../services/notification';
     import { getDateStringFromDateTime } from '../../common/utils';
 
-    export default {
-        name: 'Customers',
-        components: { NavBar, Loader, DataTable },
+    @Component({
         notifications: { ...NOTIFICATIONS },
-        data() {
-            return {
-                title: 'Customers',
-                customers: null,
-                isPageLoading: true,
-                page: 1,
-                per_page: 10,
-                total: 0,
-                columns: [
-                    { label: 'Name', field: 'name' },
-                    { label: 'Date Registered', field: 'created_at', formatFn: getDateStringFromDateTime },
-                    { label: '', field: 'buttons' }
-                ],
-                buttons: [
-                    { id: 'view_investments', link: '/admin/customers/:id/transactions', displayText: 'View Transactions' }
-                ]
-            }
-        },
+        components: { NavBar, Loader, DataTable }
+    })
+    export default class Customers extends Vue {
+        customers: Customer[] = null;
+        isPageLoading: boolean = true;
+        page: number = 1;
+        per_page: number = 10;
+        total: number = 0;
+        columns: DatatableColumn[] = [
+            { label: 'Name', field: 'name' },
+            { label: 'Date Registered', field: 'created_at', formatFn: getDateStringFromDateTime },
+            { label: '', field: 'buttons' }
+        ];
+        buttons: DatatableButton[] = [
+            { id: 'view_investments', link: '/admin/customers/:id/transactions', displayText: 'View Transactions' }
+        ];
+        title: string = 'Customers';
+
+        get user() {
+            const user = <CurrentUser> currentUser.getValue();
+            return { name: user.name, username: user.user.username };
+        }
+
         created() {
             this.customers = customerCache.getValue();
 
@@ -55,31 +59,24 @@
 
             customerCache.subscribe(val => this.customers = val);
             this.loadCustomers(this.page, this.per_page);
-        },
-        computed: {
-            user: function() {
-                const user = <CurrentUser> currentUser.getValue();
-                return { name: user.name, username: user.user.username };
-            }
-        },
-        methods: {
-            loadCustomers(page: number, per_page: number) {
-                const query: PaginationQuery = { page, per_page };
+        }
 
-                getCustomers<PaginatedData<Customer>>(query).then((data: PaginatedData<Customer>) => {
-                    this.total = data.total;
-                    this.isPageLoading = false;
+        loadCustomers(page: number, per_page: number) {
+            const query: PaginationQuery = { page, per_page };
 
-                    if (data.data.length === per_page) {
-                        this.page += 1;
-                    }
-                }).catch(err => this.error({ message: err }));
-            },
-            handlePageChange() {
-                this.info({ message: 'Fetching customers...' });
-                this.loadCustomers(this.page, this.per_page);
-            },
-            handleButtonClick(buttonId: string) { }
+            getCustomers<PaginatedData<Customer>>(query).then((data: PaginatedData<Customer>) => {
+                this.total = data.total;
+                this.isPageLoading = false;
+
+                if (data.data.length === per_page) {
+                    this.page += 1;
+                }
+            }).catch(err => (<any> this).error({ message: err }));
+        }
+
+        handlePageChange() {
+            (<any> this).info({ message: 'Fetching customers...' });
+            this.loadCustomers(this.page, this.per_page);
         }
     }
 </script>

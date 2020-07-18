@@ -3,7 +3,7 @@ from marshmallow import Schema, fields, validate
 from marshmallow_enum import EnumField
 
 from .customer_investment import CustomerInvestmentRes, CustomerInvestmentResOmitInvestment
-from data.models.base import TransactionType
+from app.data.models.base import TransactionType
 
 class TransactionCreateReq(BaseModel):
     amount: int

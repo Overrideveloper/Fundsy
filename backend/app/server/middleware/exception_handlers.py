@@ -1,7 +1,7 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError, HTTPException
-from data.schemas.core import Response
+from app.data.schemas.core import Response
 from typing import List, Dict
 
 def validation_exception_handler(exc: RequestValidationError) -> JSONResponse:

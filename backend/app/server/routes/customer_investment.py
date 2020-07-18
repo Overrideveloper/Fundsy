@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Body, Depends, Path, Query, Request, HTTPException
 from fastapi.responses import JSONResponse
-from data.schemas.core import Response, PaginatedResult
-from data.schemas.customer_investment import CustomerInvestmentRes, CustomerInvestmentCreateReq, CustomerInvestmentWithdrawReq
-from data.schemas.appreciation_log import AppreciationLogReqQuery, AppreciationLogResDaily, AppreciationLogResQuarterly, AppreciationLogResWeekly, AppreciationLogResMonthly
-from data.repositories.customer_investment import CustomerInvestmentRepository
-from data.repositories.appreciation_log import AppreciationLogRepository
-from server.middleware.auth import role_access_validator
-from data.database import db
-from common.config import MIN_WITHDRAWAL
+from app.data.schemas.core import Response, PaginatedResult
+from app.data.schemas.customer_investment import CustomerInvestmentRes, CustomerInvestmentCreateReq, CustomerInvestmentWithdrawReq
+from app.data.schemas.appreciation_log import AppreciationLogReqQuery, AppreciationLogResDaily, AppreciationLogResQuarterly, AppreciationLogResWeekly, AppreciationLogResMonthly
+from app.data.repositories.customer_investment import CustomerInvestmentRepository
+from app.data.repositories.appreciation_log import AppreciationLogRepository
+from app.server.middleware.auth import role_access_validator
+from app.data.database import db
+from app.common.config import MIN_WITHDRAWAL
 
 router = APIRouter()
 customer_investment_repo = CustomerInvestmentRepository(db)
@@ -21,8 +21,8 @@ def create(body: CustomerInvestmentCreateReq = Body(...)):
         
         res = Response(data=data, code=201, message="Customer investment created successfully")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
 
 @router.get('/{id}', dependencies=[Depends(role_access_validator(False))])
 def get_one(request: Request, id: int = Path(...)):
@@ -34,8 +34,8 @@ def get_one(request: Request, id: int = Path(...)):
         res = Response(data=data, code=200, message="Customer investment returned")
 
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
 
 @router.get('/{id}/appreciation_log', dependencies=[Depends(role_access_validator(False))])
 def get_appreciation_logs(id: int = Path(...), type: AppreciationLogReqQuery = Query(default=None), page: int = Query(gt=0, default=None), per_page: int = Query(gt=0, default=None)):
@@ -61,8 +61,8 @@ def get_appreciation_logs(id: int = Path(...), type: AppreciationLogReqQuery = Q
 
         res = Response(data=data, code=200, message="Appreciation logs returned")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
 
 @router.get('/{id}/withdrawal_eligibility', dependencies=[Depends(role_access_validator(False))])
 def get_withdrawal_eligibility(id: int = Path(...)):
@@ -70,8 +70,8 @@ def get_withdrawal_eligibility(id: int = Path(...)):
         data = customer_investment_repo.withdrawal_eligibility(id)
         res = Response(data=data, code=200, message="Withdrawal eligibility returned")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
 
 @router.get('/{id}/max_amount_withdrawable', dependencies=[Depends(role_access_validator(False))])
 def get_withdrawal_eligibility(id: int = Path(...)):
@@ -79,8 +79,8 @@ def get_withdrawal_eligibility(id: int = Path(...)):
         data = customer_investment_repo.max_amount_withdrawable(id)
         res = Response(data=data, code=200, message="Max amount withdrawable returned")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
 
 @router.post('/withdraw', dependencies=[Depends(role_access_validator(False))])
 def withdraw(request: Request, body: CustomerInvestmentWithdrawReq):
@@ -95,5 +95,5 @@ def withdraw(request: Request, body: CustomerInvestmentWithdrawReq):
         res = Response(data=data, code=200, message="Withdrawal successful")
 
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc

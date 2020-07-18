@@ -2,11 +2,11 @@ const DAY = 86400, WEEK = 604800, MONTH = 2592000, YEAR = 31104000;
 
 const CURRENCY_HTML_SYMBOL = '&#8358';
 
-type durationType = ('days' | 'weeks' | 'months' | 'years');
+export type DurationType = ('days' | 'weeks' | 'months' | 'years');
 
-export const durationTypes: durationType[] = ['days', 'weeks', 'months', 'years'];
+export const durationTypes: DurationType[] = ['days', 'weeks', 'months', 'years'];
 
-export function getSecondsFromDuration(type: durationType, amount: number) {
+export function getSecondsFromDuration(type: DurationType, amount: number) {
     let seconds = 0;
 
     switch (type) {
@@ -29,8 +29,8 @@ export function getSecondsFromDuration(type: durationType, amount: number) {
     return seconds;
 }
 
-export function getDurationFromSeconds(seconds: number): { amount: number, type: durationType } {
-    const duration: { amount: number, type: durationType } = { amount: 0, type: 'days' };
+export function getDurationFromSeconds(seconds: number): { amount: number, type: DurationType } {
+    const duration: { amount: number, type: DurationType } = { amount: 0, type: 'days' };
 
     if (Number.isInteger(seconds / YEAR) === true) {
         duration.amount = (seconds / YEAR);

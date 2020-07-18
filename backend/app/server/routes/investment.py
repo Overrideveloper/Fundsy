@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Body, Query, Path, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from data.schemas.core import Response, PaginatedResult
-from data.schemas.investment import InvestmentReq, InvestmentRes
-from server.middleware.auth import role_access_validator
-from data.database import db
-from data.repositories.investment import InvestmentRepository
+from app.data.schemas.core import Response, PaginatedResult
+from app.data.schemas.investment import InvestmentReq, InvestmentRes
+from app.server.middleware.auth import role_access_validator
+from app.data.database import db
+from app.data.repositories.investment import InvestmentRepository
 
 router = APIRouter()
 investment_repo = InvestmentRepository(db)
@@ -20,8 +20,8 @@ def create(body: InvestmentReq = Body(...)):
 
         res = Response(data=dump(investment), code=201, message="Investment created")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
 
 @router.get('')
 def get_all(page: int = Query(gt=0, default=None), per_page: int = Query(gt=0, default=None)):
@@ -31,8 +31,8 @@ def get_all(page: int = Query(gt=0, default=None), per_page: int = Query(gt=0, d
         res = Response(data=data, code=200, message="Investments returned")
         
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
 
 @router.get('/{id}')
 def get_one(id: int = Path(..., gt=0)):
@@ -44,8 +44,8 @@ def get_one(id: int = Path(..., gt=0)):
 
         res = Response(data=dump(investment), code=200, message="Investment returned")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
 
 @router.put('/{id}', dependencies=deps)
 def update(id: int = Path(..., gt=0), body: InvestmentReq = Body(...)):
@@ -55,8 +55,8 @@ def update(id: int = Path(..., gt=0), body: InvestmentReq = Body(...)):
 
         res = Response(data=dump(investment), code=200, message="Investment updated")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc
     
 @router.delete('/{id}', dependencies=deps)
 def delete(id: int = Path(..., gt=0)):
@@ -65,5 +65,5 @@ def delete(id: int = Path(..., gt=0)):
 
         res = Response(data=True, code=200, message="Investment deleted")
         return JSONResponse(content=res.dict(), status_code=res.code)
-    except Exception as exc:
-        raise exc
+    except HTTPException as httpexc:
+        raise httpexc

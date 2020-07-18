@@ -3,7 +3,7 @@ import { PaginationQuery, PaginatedData } from '@/types';
 import { Response } from '@/types/http';
 import { Transaction } from '@/types/transaction';
 
-export function getCustomerTransactions<T = Transaction[] | PaginatedData<Transaction>>(customerId: number, cache: boolean, query?: PaginationQuery) {
+export function getCustomerTransactions<T = Transaction[] | PaginatedData<Transaction>>(customerId: number, query?: PaginationQuery) {
     const baseURL = `/customer/${customerId}/transaction`;
     const url = query ? `${baseURL}?page=${query.page}&per_page=${query.per_page}` : baseURL;
 

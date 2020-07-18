@@ -26,6 +26,7 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop } from 'vue-property-decorator';
     import Loader from './Loader.vue';
     import Empty from './Empty.vue';
     import { NOTIFICATIONS } from '../services/notification';
@@ -35,62 +36,62 @@
     import { formatAmountFromAPI } from '../common/utils';
     import { PaginationQuery, PaginatedData } from '../types';
 
-    export default {
-        name: 'QuarterlyAppreciationHistory',
-        props: ['customerInvestment'],
+    @Component({
         components: { Loader, Empty },
-        data() {
-            return {
-                isLoading: false,
-                isMoreLoading: false,
-                logs: null,
-                page: 1,
-                per_page: 1,
-                total: 0
-            }
-        },
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class QuarterlyAppreciationHistory extends Vue {
+        @Prop({ required: true }) customerInvestment!: CustomerInvestmentRes;
+        
+        isLoading: boolean = false;
+        isMoreLoading: boolean = false;
+        logs: AppreciationLogResQuarterly[] = null;
+        page: number = 1;
+        per_page: number = 1;
+        total: number = 0;
+
         created() {
             this.loadAppreciationHistory(this.page, this.per_page)
-        },
-        notifications: { ...NOTIFICATIONS },
-        computed: {
-            isEmpty: function() {
-                return this.logs && !this.logs.length;
-            },
-            showLoadMore: function() {
-                return this.logs && this.logs.length !== this.total;
+        }
+
+        get isEmpty() {
+            return this.logs && !this.logs.length;
+        }
+
+        get showLoadMore() {
+            return this.logs && this.logs.length !== this.total;
+        }
+
+        addLogsToList(logs: AppreciationLogResQuarterly[]) {
+            let list: AppreciationLogResQuarterly[] = this.logs || [];
+            list = [ ...list, ...logs ];
+
+            this.logs = Array.from(new Set(list.map(l => l.quarter))).map(quarter => <AppreciationLogResQuarterly> list.find(c => c.quarter === quarter));
+        }
+
+        loadAppreciationHistory(page: number, per_page: number, isMore?: boolean) {
+            const { id } = this.customerInvestment;
+
+            const query: PaginationQuery = { page: this.page, per_page: this.per_page }
+
+            if (isMore) {
+                this.isMoreLoading = true;
             }
-        },
-        methods: {
-            addLogsToList(logs: AppreciationLogResQuarterly[]) {
-                let list: AppreciationLogResQuarterly[] = this.logs || [];
-                list = [ ...list, ...logs ];
 
-                this.logs = Array.from(new Set(list.map(l => l.quarter))).map(quarter => <AppreciationLogResQuarterly> list.find(c => c.quarter === quarter));
-            },
-            loadAppreciationHistory(page: number, per_page: number, isMore?: boolean) {
-                const { id } = <CustomerInvestmentRes> this.$props.customerInvestment;
+            getAppreciationLogs<PaginatedData<AppreciationLogResQuarterly>>(id, AppreciationLogType.QUARTERLY, query).then((data: PaginatedData<AppreciationLogResQuarterly>) => {this.total = data.total;
+                this.addLogsToList(data.data)
 
-                const query: PaginationQuery = { page: this.page, per_page: this.per_page }
+                this.isMoreLoading = false;
+                this.isLoading = false;
 
-                if (isMore) {
-                    this.isMoreLoading = true;
+                if (data.data.length === per_page) {
+                    this.page += 1;
                 }
+            }).catch(err => (<any> this).error({ message: err }));
+        }
 
-                getAppreciationLogs<PaginatedData<AppreciationLogResQuarterly>>(id, AppreciationLogType.QUARTERLY, query).then((data: PaginatedData<AppreciationLogResQuarterly>) => {this.total = data.total;
-                    this.addLogsToList(data.data)
-
-                    this.isMoreLoading = false;
-                    this.isLoading = false;
-
-                    if (data.data.length === per_page) {
-                        this.page += 1;
-                    }
-                }).catch(err => this.error({ message: err }));
-            },
-            formatAmount(amount: number) {
-                return formatAmountFromAPI(amount);
-            }
+        formatAmount(amount: number) {
+            return formatAmountFromAPI(amount);
         }
     }
 </script>

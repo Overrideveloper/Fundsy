@@ -6,24 +6,19 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import SideBar from '@/components/SideBar.vue';
     import { SidebarRoute } from '../../types'; 
 
-    const routes: SidebarRoute[] = [
-        { to: '/admin/investments', name: 'Investments', icon: 'briefcase' },
-        { to: '/admin/customers', name: 'Customers', icon: 'users', icon_solid: true },
-    ]
-
-    export default {
+    @Component({
         name: 'Admin',
-        components: {
-            SideBar
-        },
-        data() {
-            return {
-                routes
-            }
-        }
+        components: { SideBar }
+    })
+    export default class Home extends Vue {
+        routes: SidebarRoute[] = [
+            { to: '/admin/investments', name: 'Investments', icon: 'briefcase' },
+            { to: '/admin/customers', name: 'Customers', icon: 'users', icon_solid: true },
+        ];
     }
 </script>
 

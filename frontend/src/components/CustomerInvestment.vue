@@ -5,12 +5,12 @@
                 <div class="customerinvestment__info">
                     <div class="img__placeholder"></div>
                     <div class="customerinvestment__info__detail">
-                        <h5 class="customerinvestment__title">{{customerInvestment.title}}</h5>
-                        <h5 class="customerinvestment__amount">{{customerInvestment.amount | currency}}</h5>
+                        <h5 class="customerinvestment__title">{{_customerInvestment.title}}</h5>
+                        <h5 class="customerinvestment__amount">{{_customerInvestment.amount | currency}}</h5>
                     </div>
                 </div>
                 <div class="customerinvestment__meta">
-                    <h5 class="customerinvestment__meta__text">{{customerInvestment.investment}}</h5>
+                    <h5 class="customerinvestment__meta__text">{{_customerInvestment.investment}}</h5>
                 </div>
 
             </div>
@@ -19,25 +19,26 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop } from 'vue-property-decorator';
     import { CustomerInvestmentRes } from '../types/customer_investment';
     import { formatAmountFromAPI, getDateStringFromDateTime } from '../common/utils';
 
-    export default {
-        name: 'CustomerInvestmentComponent',
-        props: ["customer_investment"],
-        computed: {
-            customerInvestment: function() {
-                const { title, amount: _amount, created_at, id, investment, appreciation } = <CustomerInvestmentRes> this.$props.customer_investment;
+    @Component
+    export default class CustomerInvestmentComponent extends Vue {
+        @Prop({ required: true }) customerInvestment!: CustomerInvestmentRes;
 
-                const amount = formatAmountFromAPI(_amount + appreciation)
-                const date = getDateStringFromDateTime(created_at)
+        get _customerInvestment() {
+            const { title, amount: _amount, created_at, id, investment, appreciation } = <CustomerInvestmentRes> this.customerInvestment;
 
-                return { id, title, amount, date, investment: investment.title };
-            },
-            link: function() {
-                const { id } = <CustomerInvestmentRes> this.$props.customer_investment;
-                return `/main/my-investments/${id}`;
-            }
+            const amount = formatAmountFromAPI(_amount + appreciation)
+            const date = getDateStringFromDateTime(created_at)
+
+            return { id, title, amount, date, investment: investment.title };
+        }
+
+        get link() {
+            const { id } = <CustomerInvestmentRes> this.customerInvestment;
+            return `/main/my-investments/${id}`;
         }
     }
 </script>

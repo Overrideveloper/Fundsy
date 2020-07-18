@@ -2,8 +2,8 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from .base import BaseRepository
 from .user import UserRepository, UserReq
-from data.schemas.admin import AdminCreateReq
-from data.models.core import Admin as AdminModel
+from app.data.schemas.admin import AdminCreateReq
+from app.data.models.core import Admin as AdminModel
 
 class AdminRepository(BaseRepository):
     def __init__(self, db: Session) -> None:

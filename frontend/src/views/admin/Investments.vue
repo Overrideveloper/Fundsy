@@ -22,6 +22,7 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import NavBar from '@/components/NavBar.vue';
     import Loader from '@/components/Loader.vue';
     import DataTable from '@/components/DataTable.vue';
@@ -30,40 +31,43 @@
     import EditInvestment from '@/components/admin/EditInvestment.vue';
     import { currentUser } from '../../services/auth';
     import { CurrentUser } from '../../types/auth';
-    import { PaginationQuery, PaginatedData } from '../../types';
+    import { PaginationQuery, PaginatedData, DatatableColumn, DatatableButton } from '../../types';
     import { investmentCache, getInvestments } from '../../services/investment';
     import { NOTIFICATIONS } from '../../services/notification';
     import { InvestmentRes } from '../../types/investment';
     import { getDurationFromSeconds } from '../../common/utils';
 
-    export default {
-        name: 'Investments',
+    @Component({
         components: { NavBar, Loader, Investment, AddInvestment, EditInvestment, DataTable },
-        data() {
-            return {
-                title: 'Investments',
-                investments: null,
-                isPageLoading: true,
-                isAddModalOpen: false,
-                isEditModalOpen: false,
-                investmentToEdit: null,
-                page: 1,
-                per_page: 10,
-                total: 0,
-                columns: [
-                    { label: 'Title', field: 'title' },
-                    { label: 'Appreciation Rate', field: 'appreciation_amount', formatFn: this.appreciationRateFormatFn },
-                    { label: 'Appreciation Duration', field: 'appreciation_duration', formatFn: this.appreciationDurationFormatFn },
-                    { label: 'Lock Period', field: 'lock_period', formatFn: this.lockPeriodFormatFn },
-                    { label: 'Withdrawal Cost', field: 'withdrawal_cost', formatFn: this.withdrawalCostFormatFn },
-                    { label: '', field: 'buttons' }
-                ],
-                buttons: [
-                    { id: 'edit_investment', displayText: 'Edit' }
-                ]
-            }
-        },
-        notifications: { ...NOTIFICATIONS },
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class Investments extends Vue{
+        title: string = 'Investments';
+        investments: InvestmentRes[] = null
+        isPageLoading: boolean = true;
+        isAddModalOpen: boolean = false;
+        isEditModalOpen: boolean = false;
+        investmentToEdit: InvestmentRes = null;
+        page: number = 1;
+        per_page: number = 10;
+        total: number = 0;
+        columns: DatatableColumn[] = [
+            { label: 'Title', field: 'title' },
+            { label: 'Appreciation Rate', field: 'appreciation_amount', formatFn: this.appreciationRateFormatFn },
+            { label: 'Appreciation Duration', field: 'appreciation_duration', formatFn: this.appreciationDurationFormatFn },
+            { label: 'Lock Period', field: 'lock_period', formatFn: this.lockPeriodFormatFn },
+            { label: 'Withdrawal Cost', field: 'withdrawal_cost', formatFn: this.withdrawalCostFormatFn },
+            { label: '', field: 'buttons' }
+        ];
+        buttons: DatatableButton[] = [
+            { id: 'edit_investment', displayText: 'Edit' }
+        ]
+
+        get user() {
+            const user = <CurrentUser> currentUser.getValue();
+            return { name: user.name, username: user.user.username };
+        }
+
         created() {
             this.investments = investmentCache.getValue();
 
@@ -74,75 +78,78 @@
 
             investmentCache.subscribe(val => this.investments = val);
             this.loadInvestments(this.page, this.per_page);
-        },
-        computed: {
-            user: function() {
-                const user = <CurrentUser> currentUser.getValue();
-                return { name: user.name, username: user.user.username };
+        }
+
+        loadInvestments(page: number, per_page: number) {
+            const query: PaginationQuery = { page, per_page };
+
+            getInvestments<PaginatedData<InvestmentRes>>(query).then((data: PaginatedData<InvestmentRes>) => {
+                this.total = data.total;
+                this.isPageLoading = false;
+
+                if (data.data.length === per_page) {
+                    this.page += 1;
+                }
+            }).catch(err => (<any> this).error({ message: err }));
+        }
+
+        openAddModal() {
+            this.isAddModalOpen = true;
+        }
+
+        openEditModal(investment: InvestmentRes) {
+            this.investmentToEdit = investment;
+            this.isEditModalOpen = true;
+        }
+
+        closeAddModal(addSuccess?: boolean) {
+            this.isAddModalOpen = false;
+
+            if (addSuccess) {
+                this.total += 1;
             }
-        },
-        methods: {
-            loadInvestments(page: number, per_page: number) {
-                const query: PaginationQuery = { page, per_page };
+        }
 
-                getInvestments<PaginatedData<InvestmentRes>>(query).then((data: PaginatedData<InvestmentRes>) => {
-                    this.total = data.total;
-                    this.isPageLoading = false;
+        closeEditModal(deleteSuccess?: boolean) {
+            this.isEditModalOpen = false;
+            this.investmentToEdit = null;
 
-                    if (data.data.length === per_page) {
-                        this.page += 1;
-                    }
-                }).catch(err => this.error({ message: err }));
-            },
-            openAddModal() {
-                this.isAddModalOpen = true;
-            },
-            openEditModal(investment: InvestmentRes) {
-                this.investmentToEdit = investment;
-                this.isEditModalOpen = true;
-            },
-            closeAddModal(addSuccess?: boolean) {
-                this.isAddModalOpen = false;
+            if (deleteSuccess) {
+                this.total -= 1;
+            }
+        }
 
-                if (addSuccess) {
-                    this.total += 1;
-                }
-            },
-            closeEditModal(deleteSuccess?: boolean) {
-                this.isEditModalOpen = false;
-                this.investmentToEdit = null;
+        private withdrawalCostFormatFn(value: number) {
+            return value ? `${value}%` : 'None';
+        }
 
-                if (deleteSuccess) {
-                    this.total -= 1;
-                }
-            },
-            withdrawalCostFormatFn(value: number) {
-                return value ? `${value}%` : 'None';
-            },
-            lockPeriodFormatFn(value: number) {
-                if (value) {
-                    const { amount, type } = getDurationFromSeconds(value);
-                    return `${amount} ${type}`;
-                }
-
-                return 'None';
-            },
-            appreciationRateFormatFn(value: number) {
-                return `${value}%`;
-            },
-            appreciationDurationFormatFn(value: number) {
+        private lockPeriodFormatFn(value: number) {
+            if (value) {
                 const { amount, type } = getDurationFromSeconds(value);
-                
                 return `${amount} ${type}`;
-            },
-            handlePageChange() {
-                this.info({ message: 'Fetching investments...' });
-                this.loadInvestments(this.page, this.per_page);
-            },
-            handleButtonClick(buttonId: string, data: any) {
-                if (buttonId === 'edit_investment') {
-                    this.openEditModal(data as InvestmentRes);
-                }
+            }
+
+            return 'None';
+        }
+
+        private appreciationRateFormatFn(value: number) {
+            return `${value}%`;
+        }
+
+        private appreciationDurationFormatFn(value: number) {
+            const { amount, type } = getDurationFromSeconds(value);
+            
+            return `${amount} ${type}`;
+        }
+
+        handlePageChange() {
+            (<any> this).info({ message: 'Fetching investments...' });
+            this.loadInvestments(this.page, this.per_page);
+        }
+
+        handleButtonClick(buttonId: string, data: any) {
+            if (buttonId === 'edit_investment') {
+                this.openEditModal(data as InvestmentRes);
             }
         }
     }

@@ -16,40 +16,38 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
     import 'vue-good-table/dist/vue-good-table.css'
+    import { DatatableColumn, DatatableButton } from '../types';
 
-    export default {
-        name: 'DataTable',
-        props: ["columns", "rows", "total", "per_page", "buttons"],
-        data() {
-            return {
-                options: {
-                    enabled: true,
-                    mode: 'remote',
-                    position: 'bottom',
-                    perPage: this.$props.per_page
-                }
-            }
-        },
-        methods: {
-            onPageChange() {
-                this.$emit('pageChange');
-            },
-            onButtonClick(btnId: string, data: any) {
-                this.$emit('buttonClick', btnId, data);
-            },
-            replacePathParam(link: string, data: any) {
-                const linkArr = link.split('/')
-                const linkParams = linkArr.filter(l => l.includes(':'));
+    @Component
+    export default class DataTable extends Vue {
+        @Prop({ required: true }) columns!: DatatableColumn[];
+        @Prop({ required: true }) rows!: any[];
+        @Prop({ required: true }) total!: number;
+        @Prop({ required: true }) per_page!: number;
+        @Prop() buttons: DatatableButton[];
 
-                linkParams.map(param => {
-                    const paramString = param.match(/[^:]+$/g)[0];
-                    const paramValue = data[paramString];
-                    linkArr.splice(linkArr.findIndex(l => l === param), 1, paramValue)
-                });
+        options = { enabled: true, mode: 'remote', position: 'bottom', perPage: this.per_page }
 
-                return linkArr.join('/')
-            }
+        @Emit('pageChange')
+        onPageChange() { }
+
+        onButtonClick(btnId: string, data: any) {
+            this.$emit('buttonClick', btnId, data);
+        }
+
+        replacePathParam(link: string, data: any) {
+            const linkArr = link.split('/')
+            const linkParams = linkArr.filter(l => l.includes(':'));
+
+            linkParams.map(param => {
+                const paramString = param.match(/[^:]+$/g)[0];
+                const paramValue = data[paramString];
+                linkArr.splice(linkArr.findIndex(l => l === param), 1, paramValue)
+            });
+
+            return linkArr.join('/')
         }
     }
 </script>

@@ -49,6 +49,7 @@
 </template>
 
 <script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import NavBar from '../../components/NavBar.vue';
     import Loader from '../../components/Loader.vue';
     import DailyAppreciationHistory from '../../components/DailyAppreciationHistory.vue';
@@ -63,22 +64,36 @@
     import { formatAmountFromAPI, getDateStringFromDateTime } from '../../common/utils';
     import { CustomerInvestmentRes } from '../../types/customer_investment';
 
-    export default {
-        name: 'SingleInvestment',
+    @Component({
         components: { NavBar, Loader, WithdrawModal, DailyAppreciationHistory, WeeklyAppreciationHistory, MonthlyAppreciationHistory, QuarterlyAppreciationHistory },
-        data() {
-            return {
-                title: 'My Investment',
-                isPageLoading: true,
-                customerInvestment: null,
-                withdrawalEligiblity: null,
-                maxWithdrawableAmountRaw: null,
-                isWithdrawModalOpen: false,
-                appreciationHistoryType: 'daily',
-                appreciationHistoryTypes: ['daily', 'weekly', 'monthly', 'quarterly']
-            }
-        },
-        notifications: { ...NOTIFICATIONS },
+        notifications: { ...NOTIFICATIONS }
+    })
+    export default class SingleInvestment extends Vue {
+        title: string = 'My Investment';
+        isPageLoading: boolean = true;
+        customerInvestment: CustomerInvestmentRes = null;
+        withdrawalEligiblity: boolean = null;
+        maxWithdrawableAmountRaw: number = null;
+        isWithdrawModalOpen: boolean = false;
+        appreciationHistoryType: string = 'daily';
+        appreciationHistoryTypes: string[] = ['daily', 'weekly', 'monthly', 'quarterly'];
+
+        get user() {
+            const user = <CurrentUser> currentUser.getValue();
+            return { id: user.id, name: user.name, username: user.user.username };
+        }
+        get customerInvestmentTotal() {
+            const { amount, appreciation } = this.customerInvestment;
+
+            return formatAmountFromAPI((amount + appreciation));
+        }
+        get maxWithdrawableAmount() {
+            return formatAmountFromAPI(this.maxWithdrawableAmountRaw);
+        }
+        get customerInvestmentStartDate() {
+            return getDateStringFromDateTime(this.customerInvestment.created_at);
+        }
+
         created() {
             const id = Number(this.$route.params.id)
 
@@ -89,45 +104,27 @@
                     this.withdrawalEligiblity = results[0];
                     this.maxWithdrawableAmountRaw = results[1];
                     this.isPageLoading = false;
-                }).catch(err => this.error({ message: err }));
+                }).catch(err => (<any> this).error({ message: err }));
             } else {
                 Promise.all([getCustomerInvestment(id), getWithdrawalEligibility(id), getMaxAmountWithdrawable(id)]).then(results => {
                     this.customerInvestment = results[0];
                     this.withdrawalEligiblity = results[1];
                     this.maxWithdrawableAmountRaw = results[2];
                     this.isPageLoading = false;
-                }).catch(err => this.error({ message: err }));
+                }).catch(err => (<any> this).error({ message: err }));
             }
-        },
-        computed: {
-            user: function() {
-                const user = <CurrentUser> currentUser.getValue();
-                return { id: user.id, name: user.name, username: user.user.username };
-            },
-            customerInvestmentTotal: function() {
-                const { amount, appreciation } = this.customerInvestment;
+        }
 
-                return formatAmountFromAPI((amount + appreciation));
-            },
-            maxWithdrawableAmount: function() {
-                return formatAmountFromAPI(this.maxWithdrawableAmountRaw);
-            },
-            customerInvestmentStartDate: function() {
-                return getDateStringFromDateTime(this.customerInvestment.created_at);
-            }
-        },
-        methods: {
-            withdrawModalCloseHandler(data?: CustomerInvestmentRes) {
-                this.isWithdrawModalOpen = false;
+        withdrawModalCloseHandler(data?: CustomerInvestmentRes) {
+            this.isWithdrawModalOpen = false;
 
-                if (data) {
-                    this.customerInvestment = data;
+            if (data) {
+                this.customerInvestment = data;
 
-                    Promise.all([getWithdrawalEligibility(data.id), getMaxAmountWithdrawable(data.id)]).then(results => {
-                        this.withdrawalEligiblity = results[0];
-                        this.maxWithdrawableAmountRaw = results[1];
-                    }).catch(err => this.error({ message: err }));
-                }
+                Promise.all([getWithdrawalEligibility(data.id), getMaxAmountWithdrawable(data.id)]).then(results => {
+                    this.withdrawalEligiblity = results[0];
+                    this.maxWithdrawableAmountRaw = results[1];
+                }).catch(err => (<any> this).error({ message: err }));
             }
         }
     }
