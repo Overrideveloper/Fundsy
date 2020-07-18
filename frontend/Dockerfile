@@ -13,4 +13,4 @@ RUN yarn global add @vue/cli@3.7.0
 
 COPY . /frontend/
 
-RUN yarn serve
+EXPOSE 8081
